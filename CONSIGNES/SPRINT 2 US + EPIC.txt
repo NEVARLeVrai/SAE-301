@@ -1,0 +1,340 @@
+EPIC A - Consultation & Navigation
+Contexte :
+Les utilisateurs doivent pouvoir acc�der facilement aux contenus p�dagogiques et informatifs du site, afin de progresser en musique et rester inform�s des nouveaut�s. Cette Epic regroupe toutes les fonctionnalit�s li�es � la consultation des cours et des articles.
+
+EPIC B - E-Commerce & Marketplace
+Contexte :
+L�Epic permet aux visiteurs et musiciens professionnels de vendre et acheter du mat�riel. Elle inclut la boutique en ligne, les ventes d�occasion et la vente de compositions. L�objectif est de cr�er un march� s�curis� et simple d�usage.
+
+EPIC C - Gestion de Contenu
+Contexte :
+Permettre aux r�dacteurs de cr�er et modifier les articles, avec contr�le sur leurs propres contenus, pour assurer la qualit� et l�organisation du blog.
+
+EPIC D - Administration & Supervision
+Contexte :
+Permettre aux administrateurs de g�rer le site et les contenus de mani�re globale, de valider les annonces et de configurer le site.
+
+
+Backlog Sprint2 (dans le Trello)
+D�finir les besoins utilisateurs, construire le Backlog Product
+D�finir 2 sprints distincts (2 carnets de sprint)
+
+US-04 Vente d�instruments d�occasion Priorit� : H (Should)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite mettre en vente mon mat�riel via un formulaire simple, afin de le proposer � la communaut�.
+R�gles de gestion
+Mod�ration : L'annonce n'est pas publi�e imm�diatement ; elle passe en statut "En attente de validation" .
+M�dias : Limite de 5 photos par annonce, format JPG/PNG uniquement.
+Crit�res d'acceptation
+Formulaire complet (Titre, Desc, Prix, Photos) avec validation des champs .
+Message de confirmation d'envoi affich� � l'utilisateur .
+Notification envoy�e � l'administrateur pour mod�ration .
+DOD (Definition of Done)
+Code : Formulaire HTML5 et traitement backend.
+Git : Code commit�.
+Tests : Upload de fichiers test�.
+Responsive : Formulaire utilisable sur mobile.
+Assets : Placeholder si pas d'image.
+US-05 Vente de compositions Priorit� : H+ (Must)
+Acteur : Musicien Professionnel
+Description : En tant que musicien professionnel, je souhaite vendre mes compositions (audio/partition) sur la boutique, afin de mon�tiser mon travail.
+R�gles de gestion
+Format : Les fichiers audio doivent �tre en MP3 ou WAV ; les partitions en PDF.
+Prix : Le prix doit �tre sup�rieur ou �gal � 0.
+Crit�res d'acceptation
+Produit visible en boutique avec fiche d�taill�e .
+Le fichier (audio/partition) est t�l�chargeable apr�s achat .
+Le vendeur peut modifier ou supprimer sa fiche produit .
+DOD (Definition of Done)
+Code : CRUD produit c�t� vendeur.
+Tests : Cycle de vie produit (cr�ation -> achat) valid�.
+Responsive : Tableau de bord vendeur responsive.
+US-07 Gestion de ses propres articles Priorit� : H (Should)
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite modifier mes propres articles, afin de corriger des erreurs ou mettre � jour l'information .
+R�gles de gestion
+Historique : La date de "Derni�re modification" est mise � jour automatiquement.
+Crit�res d'acceptation
+Acc�s en modification uniquement sur ses propres articles.
+Sauvegarde des modifications effective.
+Interface listant les articles de l'utilisateur.
+DOD (Definition of Done)
+Code : V�rification propri�taire c�t� serveur.
+Git : Commit�.
+Tests : Tentative d'�dition d'autrui (�chec attendu).
+US-09 Gestion des configurations Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite modifier les param�tres globaux du site, afin de le maintenir adapt� aux besoins sans toucher au code.
+R�gles de gestion
+Application : Les changements sont imm�diats apr�s sauvegarde.
+Crit�res d'acceptation
+Formulaire de param�tres modifiable.
+Sauvegarde effective en base de donn�es.
+Acc�s s�curis�.
+DOD (Definition of Done)
+Code : Table configuration en BDD et interface.
+Git : Code versionn�.
+Tests : Modification param�tre v�rifi�e sur le front.
+US-10 R�ception des annonces Priorit� : H (Should)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite mod�rer les annonces post�es par les utilisateurs, afin de garantir la qualit� et la s�curit� du march�.
+R�gles de gestion
+Statuts : En attente -> Approuv� OU Rejet�.
+Notification : Email envoy� � l'utilisateur au changement de statut.
+Crit�res d'acceptation
+Liste des annonces en attente filtrable.
+Boutons "Approuver" et "Rejeter" fonctionnels.
+Envoi automatique de notification.
+DOD (Definition of Done)
+Code : Workflow de validation.
+Git : Commit�.
+Tests : Sc�nario rejet et approbation.
+US-19 Historique des commandes Priorit� : H (Should)
+Acteur : Visiteur (Connect�)
+Description : En tant que client, je souhaite consulter mes anciennes commandes, afin d'en assurer le suivi ou de retrouver une facture .
+R�gles de gestion
+Tri : Affichage par date d�croissante (plus r�cent en haut).
+Crit�res d'acceptation
+Liste affichant Date, R�f�rence, Montant, Statut .
+Bouton "D�tails" ouvrant le r�capitulatif complet de la commande .
+Affichage optimis� sur mobile .
+DOD (Definition of Done)
+Code : Requ�tes SQL optimis�es.
+Git : Push valid�.
+Tests : V�rification des donn�es affich�es vs base de donn�es.
+Responsive : Tableaux adaptatifs ou cards sur mobile.
+US-20 Envoi d�e-mail de confirmation
+Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite recevoir une confirmation par email apr�s ma commande, afin d'avoir une preuve d'achat .
+R�gles de gestion
+Contenu : L'email doit contenir le r�capitulatif produits, le prix total, et l'adresse de facturation.
+Crit�res d'acceptation
+Email re�u automatiquement apr�s validation .
+Contenu complet et mise en page HTML propre .
+Lisibilit� v�rifi�e sur clients mail desktop et mobile .
+DOD (Definition of Done)
+Git : Commit�.
+Tests : Envoi r�el test�.
+Assets : Logo int�gr� dans le mail.
+US-21 Syst�me de notation / avis Priorit� : H (Should)
+Acteur : Client (ayant achet�)
+Description : En tant que client, je souhaite noter les produits achet�s, afin de partager mon exp�rience avec la communaut� .
+R�gles de gestion
+Mod�ration : Les commentaires textuels peuvent �tre mod�r�s a posteriori.
+Crit�res d'acceptation
+S�lecteur de note (1 � 5 �toiles) fonctionnel .
+Champ commentaire textuel disponible .
+Avis visible sur la fiche produit apr�s soumission .
+DOD (Definition of Done)
+Code : Backend de gestion des avis.
+Git : Valid�.
+Tests : Tentative d�avis sans achat (doit �chouer).
+Responsive : Formulaire accessible mobile.
+Assets : Ic�nes �toiles.
+US-22 Planification de publication d�articles Priorit� : H
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite programmer la date de sortie d'un article, afin de g�rer mon calendrier �ditorial .
+R�gles de gestion
+Visibilit� : Tant que la date < date actuelle, l'article n'est pas visible pour les visiteurs .
+Crit�res d'acceptation
+Champ "Date de publication" dans le formulaire .
+Article invisible avant la date, visible apr�s .
+Notification (email/syst�me) lors de la publication (optionnel) .
+DOD (Definition of Done)
+Code : Logique SQL.
+Git : Code versionn�.
+Tests : Test avec date future et date pass�e.
+US-24 Gestion des commentaires sur les articles Priorit� : H
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite mod�rer les commentaires sur mes articles, afin de maintenir des �changes courtois.
+R�gles de gestion
+Actions : Approuver, Supprimer, R�pondre.
+Crit�res d'acceptation
+Liste des commentaires en attente ou publi�s.
+Actions (Supprimer/Valider) fonctionnelles.
+Notification de nouveau commentaire.
+DOD (Definition of Done)
+Code : Interface Admin commentaires.
+Git : Commit�.
+Tests : Suppression commentaire effective.
+Responsive : Mobile friendly.
+US-26 Gestion des utilisateurs Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite g�rer les comptes utilisateurs (CRUD), afin de contr�ler les acc�s et assister les utilisateurs.
+R�gles de gestion
+R�les : Attribution possible des r�les (Visiteur, R�dacteur, Admin).
+Crit�res d'acceptation
+Cr�ation, �dition, Suppression de compte fonctionnelle.
+Gestion des r�les op�rationnelle.
+Consultation de l'historique utilisateur.
+DOD (Definition of Done)
+Code : Controller Admin Users.
+Git : Push.
+Tests : Changement de r�le v�rifi�.
+Responsive : Tableau utilisateurs responsive.
+US-27 Rapports statistiques Priorit� : H (Should)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite g�n�rer et exporter des rapports d'activit�, afin d'analyser la performance du site.
+R�gles de gestion
+P�riode : Filtrage par dates (D�but - Fin).
+Crit�res d'acceptation
+Graphiques visuels des ventes/consultations.
+Bouton d'export (PDF/CSV) fonctionnel.
+Filtres temporels actifs.
+DOD (Definition of Done)
+Code : G�n�ration PDF/CSV backend.
+Git : Commit�.
+Tests : Ouverture fichier export�.
+US-28 Gestion des cat�gories et tags Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite structurer les contenus via des cat�gories et tags, afin d'optimiser la navigation.
+R�gles de gestion
+Unicit� : Pas de doublon de nom de cat�gorie.
+Crit�res d'acceptation
+Interface d'ajout, de modification et de suppression.
+Association multiple possible.
+Interface simple.
+DOD (Definition of Done)
+Code : Tables relationnelles (Many-to-Many pour tags).
+Git : Code versionn�.
+Tests : Cr�ation cat�gorie et assignation article.
+US-29 Notifications pour nouvelles annonces Priorit� : H
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite �tre notifi� des nouveaux ajouts, afin d'�tre r�actif sur la mod�ration.
+R�gles de gestion
+�tat : Non lu / Lu / Archiv�.
+Crit�res d'acceptation
+Centre de notifications visible dans le back-office.
+Actions "Marquer comme lu" ou "Archiver".
+Lien direct vers l'�l�ment concern�.
+DOD (Definition of Done)
+Code : Syst�me de notif (Polling ou WebSockets).
+Git : Push.
+Tests : G�n�ration notif au post d'annonce.
+Assets : Ic�ne cloche.
+US-30 Param�trage des r�les et permissions Priorit� : H+
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite d�finir finement les permissions de chaque r�le, afin de s�curiser l'application.
+R�gles de gestion
+Hi�rarchie : Admin > R�dacteur > Visiteur (par d�faut).
+Crit�res d'acceptation
+Interface de gestion des r�les.
+Matrice de permissions �ditable.
+S�curisation imm�diate apr�s sauvegarde.
+DOD (Definition of Done)
+Git : Commit�.
+Tests : Test d'intrusion avec r�le faible (�chec attendu).
+US-32 T�l�chargement de produit num�rique Priorit� : H+
+Acteur : Client
+Description : En tant que client, je souhaite t�l�charger ma partition imm�diatement apr�s achat, afin de l'utiliser sans d�lai.
+R�gles de gestion
+Acc�s : Le bouton de t�l�chargement appara�t uniquement si le statut de commande est "Pay�".
+Disponibilit� : Le lien reste accessible dans l'espace "Mon Compte".
+Crit�res d'acceptation
+Lien g�n�r� post-paiement imm�diat.
+Fichier PDF t�l�chargeable, int�gre et lisible.
+Protection contre l'acc�s direct sans achat (403 Forbidden).
+DOD (Definition of Done)
+Code : Gestion des headers HTTP pour t�l�chargement s�curis�.
+Git : Push.
+Tests : T�l�chargement et ouverture des fichiers.
+US-33 Suivi des ventes et statistiques Priorit� : H (Should)
+Acteur : Musicien Professionnel
+Description : En tant que musicien vendeur, je souhaite visualiser mes statistiques de vente, afin d'adapter ma strat�gie commerciale .
+R�gles de gestion
+Donn�es : Affichage du CA mensuel et total.
+Crit�res d'acceptation
+Affichage du Chiffre d'Affaires total et mensuel .
+Tableau des "Meilleures ventes" triable .
+Mise � jour temps r�el apr�s une vente .
+DOD (Definition of Done)
+Code : Int�gration librairie Charting.
+Git : Code versionn�.
+Tests : Coh�rence des calculs (Somme ventes = CA).
+Responsive : Graphiques lisibles sur tablette/mobile.
+US-34 Gestion des produits Musiciens Priorit� : H+ (Must)
+Acteur : Musicien Professionnel
+Description : En tant que musicien, je souhaite modifier ou supprimer mes produits, afin de garder mon catalogue � jour.
+R�gles de gestion
+Suppression : Un produit "supprim�" qui a d�j� �t� achet� reste en base (Soft Delete) pour l'historique des acheteurs.
+Crit�res d'acceptation
+Formulaire d'�dition pr�-rempli fonctionnel.
+Mise � jour des informations imm�diate en boutique.
+Suppression logique (produit masqu�) fonctionnelle.
+DOD (Definition of Done)
+Git : Commit�.
+Tests : V�rification visibilit� produit Off/On.
+Responsive : Mobile friendly.
+US-35 Ajout de commentaire visiteur Priorit� : H (Should)
+Acteur : Visiteur (Connect�)
+Description : En tant qu'utilisateur connect�, je souhaite commenter un article, afin de r�agir et d'�changer avec la communaut�.
+R�gles de gestion
+Connexion : Obligatoire pour poster.
+Mod�ration : Message affich� "En attente de mod�ration" apr�s envoi.
+Crit�res d'acceptation
+Zone de texte pr�sente en bas d'article.
+Envoi du commentaire.
+Retour clair apr�s soumission.
+DOD (Definition of Done)
+Code : Formulaire et Controller commentaire.
+Git : Push.
+Tests : Post commentaire v�rifi�.
+Responsive : Zone de texte adaptable.
+US-36 Suppression d'article par le r�dacteur
+Priorit� : H (Should)
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite supprimer un de mes articles obsol�te, avec une confirmation de s�curit� pour �viter les erreurs.
+R�gles de gestion
+Irr�versibilit� : Si suppression d�finitive, alerter l'utilisateur. Si archivage, indiquer comment restaurer.
+Crit�res d'acceptation
+Bouton supprimer accessible sur la liste des articles.
+Fen�tre modale de confirmation ("�tes-vous s�r ?").
+Suppression effective des donn�es.
+DOD (Definition of Done)
+Code : Requ�te delete.
+Git : Commit�.
+Tests : Annulation et Confirmation suppression test�es.
+Responsive : Modale centr�e sur mobile.
+US-37 Mod�ration absolue des contenus
+Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite pouvoir modifier ou supprimer n'importe quel contenu du site, afin de garantir la l�galit� et la qualit� �ditoriale.
+R�gles de gestion
+Super-pouvoir : L'admin passe outre les restrictions de propri�t�.
+Crit�res d'acceptation
+Boutons �diter/Supprimer visibles pour l'admin sur tout contenu.
+Modification effective sans erreur de permission.
+Log de l'action conserv�.
+DOD (Definition of Done)
+Code : Bypass des policies pour Admin.
+Git : Push.
+Tests : �dition d'un article r�dacteur par admin.
+US-38 Gestion des moyens de paiement Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite configurer les cl�s API de paiement, afin de rendre la boutique op�rationnelle.
+R�gles de gestion
+Mode : Possibilit� de basculer entre "Test" et "Live".
+Crit�res d'acceptation
+Champs de saisie pour Cl�s API (Stripe/PayPal).
+Switch Activation/D�sactivation par m�thode.
+Sauvegarde s�curis�e.
+DOD (Definition of Done)
+Code : Gestion variables d'environnement ou BDD chiffr�e.
+Git : Commit�.
+Tests : Connexion API v�rifi�e (Ping).
+Assets : Logos partenaires paiement.
+US-39 Validation de demande de r�le R�dacteur Priorit� : H
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite valider les demandes des visiteurs voulant devenir r�dacteurs, afin d'agrandir l'�quipe de mani�re contr�l�e.
+R�gles de gestion
+Process : Demande -> Examen -> Validation -> Changement de r�le -> Notification.
+Crit�res d'acceptation
+Interface listant les demandes de contribution.
+Action d'acceptation changeant le r�le utilisateur en "R�dacteur".
+Notification email automatique.
+DOD (Definition of Done)
+Code : Logique m�tier promotion utilisateur.
+Git : Push.
+Tests : Sc�nario complet demande/validation.
+US-40 Gestion de la suppression Utilisateur

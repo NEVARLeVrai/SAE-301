@@ -1,0 +1,279 @@
+EPIC A - Consultation & Navigation
+Contexte :
+Les utilisateurs doivent pouvoir acc�der facilement aux contenus p�dagogiques et informatifs du site, afin de progresser en musique et rester inform�s des nouveaut�s. Cette Epic regroupe toutes les fonctionnalit�s li�es � la consultation des cours et des articles.
+
+EPIC B - E-Commerce & Marketplace
+Contexte :
+L�Epic permet aux visiteurs et musiciens professionnels de vendre et acheter du mat�riel. Elle inclut la boutique en ligne, les ventes d�occasion et la vente de compositions. L�objectif est de cr�er un march� s�curis� et simple d�usage.
+
+EPIC C - Gestion de Contenu
+Contexte :
+Permettre aux r�dacteurs de cr�er et modifier les articles, avec contr�le sur leurs propres contenus, pour assurer la qualit� et l�organisation du blog.
+
+EPIC D - Administration & Supervision
+Contexte :
+Permettre aux administrateurs de g�rer le site et les contenus de mani�re globale, de valider les annonces et de configurer le site.
+
+
+Backlog Sprint1 (dans le Trello)
+D�finir les besoins utilisateurs, construire le Backlog Product
+D�finir 2 sprints distincts (2 carnets de sprint)
+
+
+US-01 Recherche des cours Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite rechercher et consulter des cours adapt�s � mon niveau et mon instrument, afin de d�velopper mes comp�tences musicales de fa�on autonome.
+R�gles de gestion
+Acc�s : La consultation est publique et ne n�cessite pas de cr�ation de compte.
+Filtres : Les crit�res (instrument, niveau, style) sont cumulables.
+Persistance : La navigation vers une fiche d�tail ne doit pas r�initialiser les filtres lors du retour � la liste.
+Crit�res d'acceptation
+La liste des cours s�affiche avec aper�u (titre, auteur, niveau, cat�gorie).
+Les filtres (cat�gorie, niveau, instrument) actualisent la liste dynamiquement.
+La navigation "Retour � la liste" ram�ne � la s�lection pr�c�dente.
+L'affichage est responsive (mobile/desktop).
+DOD (Definition of Done)
+Code : HTML/CSS/JS structur� et comment�.
+Tests : Validation fonctionnelle des filtres.
+Responsive : Test� sur simulateur mobile.
+Assets : Images optimis�es.
+US-02 Veille musicale (Blog) Priorit� : H (Should)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite lire des articles d'actualit� et d'analyse musicale, afin de rester inform� des tendances.
+R�gles de gestion
+Structure : Un article doit contenir obligatoirement un titre, une date et un auteur.
+M�dias : Les vid�os int�gr�es doivent provenir de sources g�r�es (ex: YouTube embed ou lecteur local).
+Crit�res d'acceptation
+Liste d�articles affich�e avec vignette, titre, date et auteur.
+Filtre par cat�gorie (Actualit�, Technique, Interviews) fonctionnel.
+Article complet lisible avec mise en forme (gras, italique, titres).
+Boutons de partage r�seaux sociaux fonctionnels.
+DOD (Definition of Done)
+Code : HTML s�mantique (balises article, section).
+Git : Valid� et merg�.
+Tests : Liens et int�gration m�dias v�rifi�s.
+Responsive : Lecture agr�able sur mobile.
+Assets : Poids des m�dias contr�l�.
+US-03 Achat de partitions et instruments
+Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite acheter des partitions ou des instruments via un parcours clair, afin d'acqu�rir du mat�riel rapidement et de fa�on s�curis�e .
+NFR (Exigences Non Fonctionnelles)
+S�curit� : Les transactions doivent �tre chiffr�es.
+Performance : Le processus de validation du panier ne doit pas d�passer 5 secondes.
+Ergonomie : Le tunnel d'achat doit comporter un indicateur d'�tape.
+BDD : Une base de donn�e sera n�cessaire
+R�gles de gestion
+Stock : La validation de la commande d�cr�mente automatiquement le stock.
+Paiement : La commande n'est cr��e qu'apr�s retour positif du prestataire de paiement.
+Crit�res d'acceptation
+Les produits s'affichent avec image, description et prix .
+Le panier est modifiable avant paiement (ajout/suppression) .
+Le paiement est s�curis� et valid� .
+Un email de confirmation est envoy� post-achat .
+DOD (Definition of Done)
+Code : HTML/CSS/JS et Backend s�curis�.
+Tests : Test de paiement valid�.
+Responsive : Tunnel d'achat mobile-friendly.
+Assets : Ic�nes de paiement.
+US-06 R�daction d�articles Priorit� : H+ (Must)
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite �crire et publier des articles via une interface d�di�e, afin d'alimenter le blog.
+R�gles de gestion
+Champs obligatoires : Titre, Contenu, Cat�gorie.
+Auteur : L'auteur est automatiquement d�fini comme l'utilisateur connect�.
+Crit�res d'acceptation
+Article publi� visible imm�diatement sur le front-office.
+Mise en forme (gras, listes, titres) conserv�e.
+Int�gration d'images fonctionnelle.
+DOD (Definition of Done)
+Code : Int�gration �diteur.
+Git : Branche feature.
+Tests : Cr�ation article complet valid�e.
+Responsive : �diteur utilisable sur tablette.
+US-08 Supervision globale Priorit� : H+ (Must)
+Acteur : Administrateur
+Description : En tant qu'administrateur, je souhaite visualiser un tableau de bord global, afin de surveiller l'activit� du site (contenus, commandes).
+R�gles de gestion
+Acc�s : R�serv� strictement au r�le "Admin".
+Crit�res d'acceptation
+Vue d'ensemble des contenus et activit�s r�centes.
+Acc�s rapide � l'historique des commandes.
+Filtres globaux op�rationnels.
+DOD (Definition of Done)
+Code : Dashboard Admin HTML/CSS.
+Tests : Acc�s refus� pour non-admin.
+Responsive : Dashboard responsive.
+Assets : Graphiques/Ic�nes dashboard.
+US-11 Page d�accueil attractive Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite acc�der � une page d�accueil claire pr�sentant les nouveaut�s, afin de naviguer rapidement vers les contenus pertinents.
+R�gles de gestion
+Priorisation : Les "Derni�res nouveaut�s" doivent �tre tri�es par date de publication d�croissante.
+Structure : La page doit contenir les sections Partitions, Articles, Cours et Annonces.
+Crit�res d'acceptation
+Sections distinctes et bien s�par�es visuellement.
+Widgets interactifs (carrousel ou grille) fonctionnels.
+Header et Footer visibles et op�rationnels.
+Adaptation parfaite sur mobile.
+DOD (Definition of Done)
+Code : Structure HTML5 valide W3C.
+Git : Commit propre.
+Tests : Navigation vers les sous-pages valid�e.
+Responsive : Burger menu fonctionnel sur mobile.
+Assets : Logos et banni�res optimis�s.
+US-12 Filtrage avanc� des cours Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite filtrer les cours par crit�res pr�cis (niveau, instrument, dur�e), afin de trouver rapidement une ressource adapt�e.
+R�gles de gestion
+Combinaison : L'utilisateur doit pouvoir s�lectionner "Guitare" ET "D�butant" simultan�ment.
+Z�ro r�sultat : Un message explicite doit s'afficher si aucun cours ne correspond aux crit�res.
+Crit�res d'acceptation
+Filtres (Niveau, Instrument, Dur�e) pr�sents.
+Actualisation automatique des r�sultats sans rechargement complet de page (souhaitable).
+Possibilit� de r�initialiser tous les filtres en un clic.
+DOD (Definition of Done)
+Git : Pouss� sur branche d�di�e.
+Tests : Cas de filtrage combin�s test�s.
+Responsive : Filtres accessibles sur mobile.
+Assets : Ic�nes de filtres claires.
+US-13 Recherche d�articles Priorit� : H (Should)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite rechercher des articles via une barre de saisie, afin d'acc�der directement � un sujet sp�cifique.
+R�gles de gestion
+P�rim�tre : La recherche s'effectue sur le Titre et le R�sum� des articles.
+Tol�rance : La recherche n'est pas sensible � la casse (majuscule/minuscule).
+Crit�res d'acceptation
+Barre de recherche pr�sente sur l'index du blog.
+Suggestions ou autocompl�tion (optionnel mais appr�ci�).
+Affichage des r�sultats pertinents (Titre, Date, R�sum�).
+DOD (Definition of Done)
+Code : Formulaire de recherche HTML/JS.
+Git : Versionn�.
+Tests : Recherche avec mots vides, accents, majuscules.
+Responsive : Champ adapt� � la largeur d'�cran.
+US-14 Navigation par cat�gories (Home) Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite acc�der aux cat�gories de contenus depuis la page d'accueil, afin d'orienter ma navigation d�s l'arriv�e.
+R�gles de gestion
+Redirection : Chaque cat�gorie pointe vers la page d'index filtr�e correspondante (ex: Clic sur "Guitare" -> Page Cours filtr�e sur Guitare).
+Crit�res d'acceptation
+Cat�gories principales visuellement mises en avant.
+Clic redirige vers la page correcte.
+Effets de survol (hover) pour l'interactivit�.
+DOD (Definition of Done)
+Code : Liens HTML corrects (<a>).
+Git : Commit.
+Tests : V�rification de toutes les URLs de destination.
+Responsive : Grille de cat�gories flexible.
+Assets : Images d'illustration des cat�gories.
+US-15 Visualisation d�taill�e d�un cours Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite voir la fiche compl�te d'un cours, afin de d�cider si je veux le suivre.
+R�gles de gestion
+Contenu : Si le cours contient une vid�o, elle ne doit pas se lancer automatiquement (autoplay off).
+Ressources : Les liens de t�l�chargement doivent indiquer le type et la taille du fichier.
+Crit�res d'acceptation
+Affichage complet : Titre, Desc., Auteur, Niveau, Dur�e.
+Section "Ressources" avec liens de t�l�chargement fonctionnels.
+Mise en page a�r�e facilitant la lecture.
+DOD (Definition of Done)
+Code : Page HTML d�tail structur�e.
+Tests : T�l�chargement de fichier test�.
+Responsive : Lecture confortable sur mobile.
+Assets : Ic�nes de type de fichier (PDF, MP3).
+US-16 Syst�me de favoris Priorit� : H (Should)
+Acteur : Visiteur (Cookies) ou Connect�
+Description : En tant que visiteur, je souhaite marquer des cours ou articles, afin de les retrouver plus tard.
+R�gles de gestion
+Stockage : Synchronisation en base de donn�es.
+�tat : L'ic�ne doit changer d'�tat (plein/vide) selon le statut.
+Crit�res d'acceptation
+Bouton "Ajouter aux favoris" sur les cartes et fiches d�tail.
+Page ou pop-up "Mes favoris" listant les �l�ments sauvegard�s.
+Possibilit� de retirer un favori.
+DOD (Definition of Done)
+Code : Gestion du stockage (LocalStorage/DB).
+Git : Code versionn�.
+Tests : Ajout/Suppression et persistance au rechargement de page.
+Responsive : Ic�ne accessible (taille tactile suffisante).
+Assets : Ic�nes SVG on/off.
+US-17 Ajout au panier depuis plusieurs pages Priorit� : H+
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite ajouter un produit au panier depuis n'importe quelle liste ou fiche, afin de gagner du temps .
+R�gles de gestion
+Unicit� : Si le produit est d�j� au panier, la quantit� est incr�ment�e de +1.
+Crit�res d'acceptation
+Bouton "Ajouter au panier" pr�sent sur fiches et listes .
+Compteur du panier (header) mis � jour en temps r�el .
+Notification "Toast" ou message de confirmation discret .
+DOD (Definition of Done)
+Git : Commit�.
+Tests : Ajout multiple.
+Responsive : Bouton accessible sur tactile.
+US-18 Modification du panier Priorit� : H+ (Must)
+Acteur : Visiteur
+Description : En tant que visiteur, je souhaite modifier les quantit�s ou supprimer des articles dans mon panier, afin d'ajuster ma commande avant paiement .
+R�gles de gestion
+Total : Le prix total doit inclure les �ventuels frais de port (si applicables).
+Vide : Si quantit� = 0, le produit est retir� du panier.
+Crit�res d'acceptation
+Ajout/Suppression de produits fonctionnel .
+Modification des quantit�s prise en compte .
+Montant total mis � jour dynamiquement .
+DOD (Definition of Done)
+Code : Logique de calcul JS/Backend.
+Git : Code versionn�.
+Tests : Cas limites (quantit� n�gative, stock max) test�s.
+Responsive : panier lisible sur mobile.
+Assets : Ic�nes poubelle/�dition.
+US-23 Upload de fichiers multim�dias Priorit� : H+ (Must)
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite ajouter des images ou vid�os � mes articles, afin d'enrichir le contenu visuel .
+R�gles de gestion
+Types : Formats accept�s : JPG, PNG, GIF, MP4, PDF.
+Poids : Limite max par fichier (ex: 5Mo).
+Crit�res d'acceptation
+Upload multi-fichiers possible .
+Aper�u de l'image disponible avant insertion .
+Fichiers correctement li�s � l'article .
+DOD (Definition of Done)
+Code : Script d�ajout s�curis�.
+Git : Push.
+Tests : Upload formats divers valid�.
+Assets : Placeholder sur les images pas affich�es.
+US-25 Syst�me de brouillon pour articles Priorit� : H+
+Acteur : R�dacteur
+Description : En tant que r�dacteur, je souhaite sauvegarder mes articles en cours sans les publier, afin de pouvoir y revenir plus tard.
+R�gles de gestion
+Statut : Un article a un statut : "Brouillon" ou "Publi�".
+Visibilit� : Les brouillons sont invisibles pour le public.
+Crit�res d'acceptation
+Bouton "Enregistrer en brouillon" distinct de "Publier".
+Liste des brouillons accessible au r�dacteur.
+Reprise de l'�dition possible � tout moment.
+DOD (Definition of Done)
+Code : Gestion champ statut en BDD.
+Git : Code versionn�.
+Tests : V�rification non-affichage des brouillons.
+US-31 Consultation des cours Priorit� H+ (Must) 4
+Acteur : Visiteur (Connect�)
+Description : En tant que visiteur, je souhaite consulter les cours, afin d'apprendre de mani�re autonome.
+NFR (Exigences Non Fonctionnelles)
+Performance : Le temps de chargement de la page (incluant les m�dias) ne doit pas exc�der 3 secondes (Core Web Vitals).
+Compatibilit� : Le rendu doit �tre fonctionnel sur les navigateurs majeurs (Chrome, Firefox, Safari, Edge).
+R�gles de gestion
+Acc�s : La consultation de cette page ne n�cessite pas d'authentification pr�alable.
+Formats : Les ressources t�l�chargeables doivent �tre dans des formats standards et s�curis�s.
+Affichage : Si un m�dia (vid�o) est indisponible, une image de remplacement doit s'afficher.
+Crit�res d'acceptation
+Structure de la page : La page d�tail du cours affiche explicitement le Titre, l'Auteur, le Niveau de difficult�, et le M�dia principal.
+T�l�chargement : Un bouton ou une section d�di�e permet le t�l�chargement effectif des ressources associ�es.
+Responsivit� : La mise en page s'adapte sans rupture graphique sur mobile, tablette et desktop.
+Navigation : Pr�sence d'un fil d'ariane ou d'un bouton "Retour" vers la liste des cours.
+DOD (Definition of Done)
+Code : Le code HTML/CSS/JS est �crit, comment�.
+Git : Le code est commit� et pouss� sur la branche de fonctionnalit�.
+Tests : Les tests fonctionnels sont valid�s selon les crit�res d'acceptation ci-dessus.
+Responsive : L'affichage a �t� v�rifi� sur un simulateur mobile et sur �cran large.
+Assets : Les images et vid�os int�gr�es sont optimis�es pour le web.

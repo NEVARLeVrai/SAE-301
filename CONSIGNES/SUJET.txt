@@ -1,0 +1,67 @@
+Concevoir et d�velopper une exp�rience utilisateur
+Participants
+Yann Le naour;� Nicolas Schiff; Patrick Voltzenlogel ; Jean FERRY,
+Objectifs
+Combiner les ressources li�es au d�veloppement web, au design d�exp�rience et � la gestion de projet pour concevoir et d�velopper des parcours utilisateurs. En tant qu�int�grateurs web et UX-designers, les �tudiants doivent analyser le brief d�une application ou d�un site web, identifier les parcours utilisateurs, avant d�en d�velopper les fonctionnalit�s en r�pondant � la question :�Comment mettre en place un site web offrant une exp�rience utilisateur de qualit� ?
+Comp�tences
+?�������Comprendre : parcours utilisateur, exp�rience utilisateur
+?�������Concevoir : concevoir un service, une recommandation ergonomique
+?�������D�velopper : mettre en place un back-office, produire des application web
+?�������Entreprendre : gestion de projet agile (Scrum)
+Sujet
+Site de partage et d��change sur la musique proposant des services comme des cours de musique, des articles de blog (actualit� musicale), la vente de partitions et la vente d�instruments de musique d�occasion
+Le site doit proposer diff�rents parcours utilisateur :
+?�������Un�visiteur�peut parcourir le site et rechercher des cours de musique gratuits, class�s par cat�gories et sous-cat�gories. Il peut �galement consulter des articles de blog et visiter la boutique permettant de commander des partitions payantes (partitions physiques et virtuelles en PDF), �galement class�es par cat�gories et sous-cat�gories, ainsi que des instruments de musique d�occasion.
+Le visiteur peut �galement soumettre une annonce via un formulaire de contact, pour vendre un instrument de musique d�occasion.
+?�������Un�r�dacteur�peut acc�der au back-office du site pour r�diger un article de blog. Mais il ne peut en aucun cas modifier ou supprimer un article r�dig� par une autre personne que lui-m�me. Il ne peut pas non plus modifier les r�glages de WordPress, la boutique etc.
+?�������Un�musicien professionnel�peut ajouter des produits � la boutique pour vendre ses compositions musicales personnelles
+?�������Un�administrateur�peut visualiser l�ensemble des articles, cours et produits propos�s, ainsi que les commandes pass�es sur le site. Il acc�de � tous les r�glages de WordPress. Il re�oit �galement les�annonces�du formulaire de contact.
+�
+Votre site devra �tre ergonomique et graphique. La maquette doit �tre responsive gr�ce aux fonctionnalit�s d�Elementor.
+La note tiendra compte�du nombre et de la richesse des publications�! Alors l�chez-vous�
+* Vous devrez �tre capable d'expliquer votre travail lors de l'entretien individuel qui aura lieu le dernier jour.
+
+Partie d�veloppement pour le parcours DW
+Intervenant : David Cazier�
+Travail � faire
+Vous devez d�velopper en PHP un site web correspondant aux services et parcours utilisateurs que vous avez d�finis.
+L'interface de ce site doit �tre propre, fonctionnelle et exploiter les notions vues en cours d'int�gration. Vous pouvez utiliser un framework CSS (bootstrap...) ou cr�er vos propres CSS.
+Les �l�ments du syst�me d'information (partitions, services, emprunts...) seront cod�s dans des classes s�par�es avec les m�thodes CRUD vue en cours
+Vous n'�tes pas oblig�s de d�velopper toutes les fonctionalit�s imagin�es en phase 1 (manque de temps ou technologie non maitris�e). Mais vous d�velopperez les parcours correspondants sous formme de prototype avec des pages statiques (affichant des r�sultats ou messages fixes).
+R�les et contr�leurs
+Chaque parcours utilisateur correspond � un des r�les que vous aurez d�finis.
+Pour coder ces parcours, vous pouvez commencer par cr�er un contr�leur par r�le. Sur la page d'accueil, le visiteur choisi le r�le qu'il veut prendre. Dans un second temps, il sera possible d'ajouter un syst�me de connexion qui limitera les r�les affich�s en fonction du profil de l'utilisateur. Ce syst�me de connexion est facultatif.
+Chaque �tape de vos parcours utilisateurs correspondra � une route de votre contr�leur. Vous pouvez utiliser une page par �tape ou d�finir les �tapes d'un parcours comme diff�rentes actions d'une page. Par exemple :
+o R�le visiteur : le contr�leur affiche les diff�rentes pages, mais uniquement les actions "read"
+o R�le musicien : le contr�leur affiche en plus les �l�ments permettant d'ajouter des cours ou des partitions, avec les actions "new", "create", "edit", "update" et "delete" correspondant
+o R�le admin : le controleur affiche tous les �l�ments du back-office
+Pour mieux organiser les choses, il est possible de placer les diff�rents contr�leurs et templates dans des sous-dossiers portant le nom des r�les. Par exemple :
+o Page accueil ou connexion :
+* contr�leur : /index.php
+* fichiers twig : /templates/accueil_connexion.twig
+o R�le admin :
+* contr�leur : /admin/index.php
+* fichiers twig : /templates/admin/index_admin.twig
+o R�le visiteur :
+* contr�leur : /visiteur/index.php
+* fichiers twig : /templates/visiteur/index_visiteur.twig
+Rendus
+7. Votre site Web en ligne (indiquez l'url dans le document de suivi)
+8. Votre code source dans une archive ZIP nomm� "NOM_Pr�nom.zip" (modifiez bien le nom du dossier AVANT de le compresser)
+9. D�poser le fichier ZIP via ce�lien seafile de d�pot
+10. Vous pouvez d�poser plusieurs version de votre projet en ajoutant le num�ro de version � la fin 'NOM_Pr�nom_v3.zip"
+11. Un syst�me de v�rification des envois sera disponible en fin de projet.
+Si vous avez cr�� des utilisateurs ou un compte admin avec des fonctionalit�s sp�cifiques, pensez � me fournir les identifiants et mots de passe pour que je puisse tester votre site. Vous pouvez mettre les informations utiles dans un fichier README � la racine du projet (dans le ZIP).
+
+je ne vais pas utiliser TWIG
+
+
+Important : pour être validés et évalués les codes rendus doivent respecter les consignes et bonnes pratiques vues en cours :
+
+encapsulation des données :
+les attributs des objets ne sont utilisés qu'au sein de leur classe
+les données POST sont exploitées dans la classe correspondant
+séparation de l'accès aux données et du contrôle de l'application :
+les données et les méthodes CRUD sont placées dans les classes
+un controleur gère le cheminement et les actions des utilisateurs
+Le code généré sortant de ce cadre, même s'il est correct, ne sera pas évalué.

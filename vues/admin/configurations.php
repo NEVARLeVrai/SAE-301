@@ -1,0 +1,81 @@
+<h1>Configuration du Site</h1>
+<p>Gérez les paramètres généraux et les intégrations du site.</p>
+
+<?php if (isset($success)): ?>
+    <div class="alert alert-success"><?= $success ?></div>
+<?php endif; ?>
+
+<form method="POST" action="index.php?action=configurations" class="admin-form">
+    <h3>Paramètres généraux</h3>
+    
+    <div class="form-group">
+        <label for="site_title">Titre du site</label>
+        <input type="text" id="site_title" name="site_title" value="<?= htmlspecialchars($configs['site_title'] ?? '') ?>" placeholder="OmniMusique">
+    </div>
+    
+    <div class="form-group">
+        <label for="contact_email">Email de contact</label>
+        <input type="email" id="contact_email" name="contact_email" value="<?= htmlspecialchars($configs['contact_email'] ?? '') ?>" placeholder="contact@omnimusique.fr">
+    </div>
+    
+    <div class="form-group">
+        <label for="maintenance_mode">Mode Maintenance</label>
+        <select id="maintenance_mode" name="maintenance_mode">
+            <option value="0" <?= ($configs['maintenance_mode'] ?? '0') == '0' ? 'selected' : '' ?>>Désactivé</option>
+            <option value="1" <?= ($configs['maintenance_mode'] ?? '0') == '1' ? 'selected' : '' ?>>Activé</option>
+        </select>
+    </div>
+    
+    <hr>
+    
+    <h3>Paiement (US-38)</h3>
+    
+    <div class="form-group">
+        <label for="payment_mode">Mode de paiement</label>
+        <select id="payment_mode" name="payment_mode">
+            <option value="test" <?= ($configs['payment_mode'] ?? 'test') == 'test' ? 'selected' : '' ?>>Test</option>
+            <option value="live" <?= ($configs['payment_mode'] ?? 'test') == 'live' ? 'selected' : '' ?>>Live</option>
+        </select>
+        <small>En mode Test, seules les clés de test sont utilisées.</small>
+    </div>
+    
+    <h4>Stripe</h4>
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="stripe_enabled" value="1" <?= ($configs['stripe_enabled'] ?? '0') == '1' ? 'checked' : '' ?>>
+            Activer Stripe
+        </label>
+    </div>
+    <div class="form-group">
+        <label for="stripe_key">Clé API Stripe</label>
+        <input type="text" id="stripe_key" name="stripe_key" value="<?= htmlspecialchars($configs['stripe_key'] ?? '') ?>" placeholder="pk_test_... ou pk_live_...">
+        <small>Clé publique (publishable key)</small>
+    </div>
+    <div class="form-group">
+        <label for="stripe_secret">Clé secrète Stripe</label>
+        <input type="password" id="stripe_secret" name="stripe_secret" value="<?= htmlspecialchars($configs['stripe_secret'] ?? '') ?>" placeholder="sk_test_... ou sk_live_...">
+        <small>Clé secrète (secret key) - Ne jamais partager</small>
+    </div>
+    
+    <h4>PayPal</h4>
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="paypal_enabled" value="1" <?= ($configs['paypal_enabled'] ?? '0') == '1' ? 'checked' : '' ?>>
+            Activer PayPal
+        </label>
+    </div>
+    <div class="form-group">
+        <label for="paypal_key">Clé API PayPal</label>
+        <input type="text" id="paypal_key" name="paypal_key" value="<?= htmlspecialchars($configs['paypal_key'] ?? '') ?>" placeholder="AY...">
+        <small>Client ID PayPal</small>
+    </div>
+    <div class="form-group">
+        <label for="paypal_secret">Secret PayPal</label>
+        <input type="password" id="paypal_secret" name="paypal_secret" value="<?= htmlspecialchars($configs['paypal_secret'] ?? '') ?>" placeholder="Secret...">
+        <small>Client Secret PayPal - Ne jamais partager</small>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn">Enregistrer les modifications</button>
+    </div>
+</form>

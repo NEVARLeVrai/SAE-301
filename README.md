@@ -1,0 +1,219 @@
+# SAE 301 - OmniMusique
+
+## Description du projet
+Site de partage et d'échange sur la musique proposant :
+- Des cours de musique gratuits (classés par catégories et niveaux)
+- Un blog avec actualités musicales
+- Une boutique de partitions (physiques et PDF)
+- Une marketplace d'instruments d'occasion
+
+## Auteur
+**SOARES Daniels**
+
+---
+
+## Installation
+
+### Prérequis
+- Serveur Apache avec PHP 7.4+
+- MySQL 5.7+ / MariaDB
+- Extension PDO activée
+
+### Configuration
+1. Importer le fichier `bdd/script_creation_bdd.sql` dans phpMyAdmin
+2. Modifier les identifiants de connexion dans `modeles/Database.php` si nécessaire :
+
+```php
+    private $host = "localhost:3306";
+    private $db_name = "soares_sae301"; 
+    private $username = "daniels_soares_sae301";
+    private $password = "p9_82ve5J"; 
+```
+
+3. S'assurer que les dossiers `assets/` et `img/` existent et sont accessibles en écriture pour les uploads
+
+---
+
+## URLs d'accès
+
+| Section | URL |
+|---------|-----|
+| **Front-office (Visiteur)** | `` |
+| **Back-office (Admin)** | `` |
+
+---
+
+## Identifiants de test
+
+| Rôle | Email | Mot de passe |
+|------|-------|--------------|
+| **Administrateur** | admin@omnimusique.com | `admin123` |
+| **Rédacteur** | redac@omnimusique.com | `redac123` |
+| **Musicien Pro** | mozart@omnimusique.com | `mozart123` |
+| **Visiteur** | visiteur@omnimusique.com | `visiteur123` |
+
+---
+
+## Structure du projet
+
+```
+SAE 301/
+├── index.php                 # Page d'accueil (choix du rôle)
+├── README.md                 # Ce fichier
+├── bdd/
+│   └── script_creation_bdd.sql
+├── controllers/
+│   ├── admin/
+│   │   └── index.php         # Contrôleur administration
+│   └── visiteur/
+│       └── index.php         # Contrôleur visiteur
+├── modeles/
+│   ├── Database.php          # Connexion BDD
+│   ├── Validator.php         # Validation des données (centralisée)
+│   ├── User.php              # Gestion utilisateurs
+│   ├── Article.php           # Gestion articles blog
+│   ├── Cours.php             # Gestion cours
+│   ├── Produit.php           # Gestion produits
+│   ├── Order.php             # Gestion commandes
+│   ├── Avis.php              # Gestion avis produits
+│   ├── Commentaire.php       # Gestion commentaires
+│   ├── Configuration.php     # Paramètres site
+│   ├── Tag.php               # Gestion tags articles
+│   ├── Favori.php            # Gestion favoris
+│   ├── Notification.php      # Notifications admin
+│   ├── RoleRequest.php       # Demandes de rôle (US-39)
+│   ├── ModerationRequest.php # Demandes modération produits (US-10)
+│   ├── Permission.php        # Matrice permissions (US-30)
+│   ├── Rapport.php           # Rapports et exports (US-27)
+│   └── FileUpload.php        # Gestion uploads fichiers (US-23)
+├── vues/
+│   ├── admin/                # Vues back-office
+│   ├── visiteur/             # Vues front-office
+│   └── global/               # Header/Footer partagés
+├── css/
+│   └── style.css             # Styles personnalisés
+├── assets/                   # Images et fichiers uploadés
+│   └── system/               # Fichiers système (favicon, etc.)
+└── img/                      # Dossier alternatif uploads
+```
+
+---
+
+## Fonctionnalités implémentées
+
+### Sprint 1 - User Stories
+
+| US | Description | Statut |
+|----|-------------|--------|
+| US-01 | Recherche et filtrage des cours | ✅ |
+| US-02 | Blog avec articles et partage réseaux sociaux | ✅ |
+| US-03 | Achat partitions/instruments avec panier | ✅ |
+| US-06 | Rédaction d'articles (back-office) | ✅ |
+| US-08 | Dashboard admin avec statistiques | ✅ |
+| US-11 | Page d'accueil avec nouveautés | ✅ |
+| US-12 | Filtrage avancé des cours (niveau, instrument) | ✅ |
+| US-13 | Recherche d'articles | ✅ |
+| US-14 | Navigation par catégories | ✅ |
+| US-15 | Fiche détail cours | ✅ |
+| US-16 | Système de favoris (BDD) | ✅ |
+| US-17 | Ajout au panier depuis liste/fiche | ✅ |
+| US-18 | Modification du panier | ✅ |
+| US-23 | Upload fichiers multimédia (5Mo max) | ✅ |
+| US-25 | Système de brouillons articles | ✅ |
+| US-31 | Consultation cours avec fil d'Ariane | ✅ |
+
+### Sprint 2 - User Stories
+
+| US | Description | Statut |
+|----|-------------|--------|
+| US-04 | Vente instruments d'occasion (modération) | ✅ |
+| US-05 | Vente compositions (Musicien Pro) | ✅ |
+| US-07 | Gestion ses propres articles (Rédacteur) | ✅ |
+| US-09 | Configuration globale du site | ✅ |
+| US-10 | Modération des annonces produits | ✅ |
+| US-19 | Historique des commandes | ✅ |
+| US-20 | Email de confirmation commande | ✅ |
+| US-21 | Système de notation/avis (étoiles 1-5) | ✅ |
+| US-22 | Planification publication articles | ✅ |
+| US-24 | Gestion commentaires articles | ✅ |
+| US-26 | Gestion utilisateurs (CRUD) | ✅ |
+| US-27 | Rapports statistiques + Export CSV/PDF | ✅ |
+| US-28 | Gestion catégories et tags | ✅ |
+| US-29 | Centre de notifications admin | ✅ |
+| US-30 | Matrice des permissions par rôle | ✅ |
+| US-32 | Téléchargement sécurisé produits numériques | ✅ |
+| US-33 | Statistiques ventes (Musicien) | ✅ |
+| US-34 | Gestion produits Musicien (soft delete) | ✅ |
+| US-35 | Commentaires visiteur (modération) | ✅ |
+| US-36 | Suppression articles (soft delete) | ✅ |
+| US-37 | Modération absolue admin | ✅ |
+| US-38 | Configuration moyens de paiement | ✅ |
+| US-39 | Demande/validation de rôle contributeur | ✅ |
+
+---
+
+## Rôles et Permissions
+
+### Visiteur
+- Consultation des cours, articles, boutique
+- Achat et historique commandes
+- Commentaires sur articles
+- Avis sur produits achetés
+- Vente d'instruments d'occasion (avec modération)
+- Gestion des favoris
+- Demande de promotion (Rédacteur/Musicien)
+
+### Rédacteur
+- Accès au back-office
+- Création/modification de SES articles uniquement
+- Modération des commentaires sur SES articles uniquement
+- Système de brouillons et planification
+
+### Musicien Professionnel
+- Accès au back-office
+- Gestion de SES produits (partitions numériques)
+- Statistiques de ventes personnelles
+- Chiffre d'affaires
+
+### Administrateur
+- Accès complet à toutes les fonctionnalités
+- Gestion des utilisateurs et rôles
+- Configuration du site
+- Rapports et exports (CSV/PDF)
+- Matrice des permissions
+- Modération globale
+- Centre de notifications
+
+---
+
+## Sécurité et Validation
+
+### Validation des données
+Le projet utilise une classe `Validator` centralisée (`modeles/Validator.php`) pour valider toutes les données utilisateur :
+
+- **Validation email** : Format, longueur (max 255 caractères)
+- **Validation mot de passe** : Longueur minimale configurable (3 pour login, 6 pour inscription), max 72 caractères
+- **Validation username** : 3-50 caractères, alphanumériques + underscore uniquement
+- **Vérification doublons** : Email et username uniques en base de données
+
+### Double vérification
+- **Côté serveur** : Validation PHP obligatoire via la classe `Validator` (sécurité principale)
+- **Côté client** : Attributs HTML5 `required` pour améliorer l'expérience utilisateur
+
+Les formulaires de login et d'inscription utilisent cette validation centralisée pour garantir la sécurité et la cohérence des données.
+
+---
+
+## Technologies utilisées
+
+| Technologie | Utilisation |
+|-------------|-------------|
+| **PHP 7.4+** | Backend (POO) |
+| **MySQL/MariaDB** | Base de données |
+| **PDO** | Connexion sécurisée BDD |
+| **HTML5/CSS3** | Frontend (Grid, Flexbox) |
+| **Bootstrap 5** | Framework CSS |
+| **Bootstrap Icons** | Icônes |
+| **Poppins** | Police Google Fonts |
+
+---
