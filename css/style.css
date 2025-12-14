@@ -241,7 +241,7 @@ h1 {
    4. Components
    ========================================= */
 
-/* --- Cards --- */
+/* --- 4.1 Cards --- */
 .card, .cours-card, .article-card, .product-card, .role-card, .comment-card, .review-card {
     background: var(--card-bg);
     border-radius: var(--border-radius);
@@ -313,7 +313,7 @@ h1 {
     line-height: 1.7;
 }
 
-/* --- Buttons --- */
+/* --- 4.2 Buttons --- */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -395,9 +395,12 @@ h1 {
     background-color: #475569; 
 }
 
-.btn-facebook { background-color: #1877f2; color: white; }
-.btn-twitter { background-color: #1da1f2; color: white; }
-.btn-linkedin { background-color: #0a66c2; color: white; }
+.btn-facebook { background-color: #1877f2; color: white; border: none; }
+.btn-facebook:hover { background-color: #166fe5; color: white; }
+.btn-twitter { background-color: #1da1f2; color: white; border: none; }
+.btn-twitter:hover { background-color: #0c8de4; color: white; }
+.btn-linkedin { background-color: #0a66c2; color: white; border: none; }
+.btn-linkedin:hover { background-color: #004182; color: white; }
 
 .btn-disabled {
     cursor: not-allowed;
@@ -405,7 +408,7 @@ h1 {
     background-color: #94a3b8;
 }
 
-/* --- Badges --- */
+/* --- 4.2 Badges --- */
 .badge {
     padding: 0.35em 0.65em;
     border-radius: 9999px;
@@ -421,7 +424,7 @@ h1 {
 .badge-info { background: var(--info-color); color: #fff; }
 .badge-secondary { background: #64748b; color: #fff; }
 
-/* --- Forms --- */
+/* --- 4.3 Forms --- */
 form {
     background: var(--card-bg);
     padding: 2.5rem;
@@ -594,7 +597,7 @@ textarea {
     white-space: nowrap;
 }
 
-/* --- Tables --- */
+/* --- 4.4 Tables --- */
 .table-responsive {
     overflow-x: auto;
     border-radius: var(--border-radius);
@@ -658,7 +661,7 @@ textarea {
     border-radius: var(--border-radius);
 }
 
-/* --- Cart Styles --- */
+/* --- 4.5 Cart (US-03, US-04) --- */
 .cart-container {
     max-width: 100%;
     overflow-x: visible;
@@ -763,7 +766,7 @@ form[action*="update_cart"] {
    5. Specific Pages & Views
    ========================================= */
 
-/* --- Login Page --- */
+/* --- 5.1 Login Page (US-11) --- */
 body.login-page {
     display: flex;
     justify-content: center;
@@ -790,7 +793,7 @@ body.login-page {
     background: transparent;
 }
 
-/* --- Role Selection (Index) --- */
+/* --- 5.2 Role Selection (Index) --- */
 .role-selection {
     display: flex;
     justify-content: center;
@@ -844,7 +847,7 @@ body.login-page {
     background-color: var(--accent-color);
 }
 
-/* --- Notifications --- */
+/* --- 5.3 Notifications (US-18) --- */
 .notification-card {
     padding: 1.25rem;
     border-left: 4px solid var(--accent-color);
@@ -885,7 +888,7 @@ body.login-page {
     gap: 0.5rem;
 }
 
-/* --- Comments & Reviews --- */
+/* --- 5.4 Comments & Reviews (US-35) --- */
 .comment-preview {
     max-width: 200px;
     white-space: nowrap;
@@ -928,7 +931,7 @@ body.login-page {
     padding-bottom: 1rem;
 }
 
-/* --- Product & Article Details --- */
+/* --- 5.5 Product & Article Details (US-02, US-13, US-14) --- */
 .article-detail-container, .product-detail-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -962,6 +965,18 @@ body.login-page {
     border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
+.no-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-radius: var(--border-radius);
+}
+
 .product-price {
     font-size: 1.75rem;
     color: var(--secondary-color);
@@ -978,7 +993,7 @@ body.login-page {
     border-top: 1px solid #e2e8f0;
 }
 
-/* --- Admin Dashboard --- */
+/* --- 5.6 Admin Dashboard (US-19, US-20) --- */
 .dashboard-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Increased min-width */
@@ -1111,23 +1126,15 @@ body.login-page {
         padding: 1rem; /* Reduced padding on mobile */
     }
 
-    .cours-container, .blog-container, .products-container, .grid-3 {
+    /* Grilles en une colonne sur mobile */
+    .cours-container, .blog-container, .products-container, .grid-3, .categories-grid {
         grid-template-columns: 1fr;
-        gap: 2rem; /* Ensure gap is sufficient on mobile */
-    }
-    
-    .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
+        gap: 2rem;
     }
 
     .role-selection {
         flex-direction: column;
         align-items: center;
-    }
-
-    .cours-container, .blog-container, .products-container, .grid-3, .categories-grid {
-        grid-template-columns: 1fr;
     }
 
     .cart-actions {
@@ -1155,7 +1162,7 @@ body.login-page {
     }
 }
 
-/* --- Hero Section --- */
+/* --- 7.1 Hero Section --- */
 .hero-section {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
@@ -1182,7 +1189,7 @@ body.login-page {
 }
 
 
-/* --- Fix for Card Links --- */
+/* --- 7.2 Card Links Fix --- */
 a.card {
     text-decoration: none;
     color: var(--text-color);
@@ -1200,7 +1207,11 @@ a.card:hover h3 {
 }
 
 /* =========================================
-   US-02 : Boutons de partage réseaux sociaux
+   8. US-Specific Styles
+   ========================================= */
+
+/* =========================================
+   8.1 US-02 : Boutons de partage réseaux sociaux
    ========================================= */
 .share-buttons {
     margin-top: 1.5rem;
@@ -1214,38 +1225,10 @@ a.card:hover h3 {
     color: var(--text-light);
 }
 
-.btn-facebook {
-    background-color: #1877f2;
-    color: white;
-    border: none;
-}
-.btn-facebook:hover {
-    background-color: #166fe5;
-    color: white;
-}
-
-.btn-twitter {
-    background-color: #1da1f2;
-    color: white;
-    border: none;
-}
-.btn-twitter:hover {
-    background-color: #0c8de4;
-    color: white;
-}
-
-.btn-linkedin {
-    background-color: #0a66c2;
-    color: white;
-    border: none;
-}
-.btn-linkedin:hover {
-    background-color: #004182;
-    color: white;
-}
+/* Note: .btn-facebook, .btn-twitter, .btn-linkedin sont définis dans la section Buttons */
 
 /* =========================================
-   US-31 : Fil d'Ariane (Breadcrumb)
+   8.2 US-31 : Fil d'Ariane (Breadcrumb)
    ========================================= */
 .breadcrumb {
     background-color: transparent;
@@ -1274,7 +1257,7 @@ a.card:hover h3 {
 }
 
 /* =========================================
-   US-27 : Page Rapports
+   8.3 US-27 : Page Rapports
    ========================================= */
 .chart-container {
     padding: 1rem 0;
@@ -1295,7 +1278,7 @@ a.card:hover h3 {
 }
 
 /* =========================================
-   US-30 : Matrice des Permissions
+   8.4 US-30 : Matrice des Permissions
    ========================================= */
 .table-bordered th,
 .table-bordered td {
@@ -1314,7 +1297,7 @@ a.card:hover h3 {
 }
 
 /* =========================================
-   US-39 : Demandes de rôle
+   8.5 US-39 : Demandes de rôle
    ========================================= */
 .role-badge {
     display: inline-block;
@@ -1345,7 +1328,7 @@ a.card:hover h3 {
 }
 
 /* =========================================
-   Classes pour remplacer les styles inline
+   8.6 Classes de remplacement (inline styles)
    ========================================= */
 
 /* Contact page */
@@ -1375,23 +1358,7 @@ a.card:hover h3 {
     cursor: pointer;
 }
 
-/* Progress bar (reports) */
-.progress {
-    height: 25px;
-    background: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: var(--primary-color);
-    transition: width 0.3s ease;
-}
-
-.progress-bar.bg-primary {
-    background: var(--primary-color);
-}
+/* Note: .progress et .progress-bar sont définis dans la section US-27 */
 
 /* Permissions page */
 .mt-1-5 {
