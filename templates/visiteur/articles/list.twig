@@ -1,0 +1,56 @@
+{#
+    ===========================================
+    BLOG - LISTE DES ARTICLES (US-02, US-13)
+    ===========================================
+    Affiche les articles avec recherche et filtres par catégorie.
+    Variables : articles, categories, search, selected_category
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Blog{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Le Blog Musique</h1>
+<p class="text-center mb-3">Toute l'actualité musicale et nos conseils techniques.</p>
+
+{# Recherche et Filtres (US-13 & US-02) #}
+<div class="p-3">
+    <div class="filter-form justify-content-between">
+        <form action="index.php" method="GET" class="d-flex gap-2 align-items-center flex-wrap">
+            <input type="hidden" name="action" value="blog">
+            <input type="text" name="search" class="form-control w-auto" placeholder="Rechercher un article..." value="{{ current_search|default('') }}">
+            <button type="submit" class="btn btn-small"><i class="bi bi-search"></i> Rechercher</button>
+        </form>
+
+        <div class="category-filters d-flex gap-2 flex-wrap align-items-center mt-2 mt-md-0">
+            <strong>Catégories : </strong>
+            <a href="index.php?action=blog" class="btn btn-small {% if not current_category %}btn-admin{% else %}btn-outline-secondary{% endif %}">Tout</a>
+            {% for cat in categories %}
+                <a href="index.php?action=blog&category={{ cat|url_encode }}" class="btn btn-small {% if current_category == cat %}btn-admin{% else %}btn-outline-secondary{% endif %}">
+                    {{ cat }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="blog-container">
+    {% if liste_articles is defined and liste_articles|length > 0 %}
+        {% for row in liste_articles %}
+            <div class="article-card">
+                {% if row.image_url %}
+                    <img src="../../assets/{{ row.image_url }}" alt="{{ row.title }}" class="article-card-img">
+                {% endif %}
+                <h2>{{ row.title }}</h2>
+                <p class="card-meta"><small><i class="bi bi-calendar"></i> {{ row.created_at|date('d/m/Y') }} | <i class="bi bi-person"></i> {{ row.author }} | <i class="bi bi-tag"></i> {{ row.category }}</small></p>
+                <p>{{ row.content|striptags|slice(0, 150) }}...</p>
+                <a href="index.php?action=article_details&id={{ row.id }}" class="btn btn-small mt-2">Lire la suite</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center">
+            <p class="alert alert-info">Aucun article trouvé.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

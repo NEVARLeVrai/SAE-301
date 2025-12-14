@@ -1,0 +1,117 @@
+{% extends 'base.twig' %}
+
+{% block title %} - {{ produit.name }}{% endblock %}
+
+{% block content %}
+<div class="product-detail-container">
+    <a href="index.php?action=boutique" class="btn btn-secondary mb-2">&larr; Retour à la boutique</a>
+    
+    <div class="card product-detail">
+        <div class="row">
+            <div class="col-md-5">
+                {% if produit.image_url %}
+                    <img src="../../assets/{{ produit.image_url }}" alt="{{ produit.name }}" class="product-detail-img img-fluid">
+                {% else %}
+                    <div class="no-image-placeholder">Pas d'image</div>
+                {% endif %}
+            </div>
+            <div class="col-md-7">
+                <h1>{{ produit.name }}</h1>
+                <p class="product-price h3 text-primary">{{ produit.price|number_format(2, ',', ' ') }} €</p>
+                <p class="card-meta">
+                    Catégorie : <em>{{ produit.category }}</em> | 
+                    Type : <em>{{ produit.type }}</em>
+                </p>
+                
+                <div class="product-description mt-3">
+                    <h4>Description</h4>
+                    <p>{{ produit.description|nl2br }}</p>
+                </div>
+                
+                <div class="product-stock mt-2">
+                    {% if produit.stock > 0 %}
+                        <span class="badge bg-success">En stock ({{ produit.stock }} disponible{% if produit.stock > 1 %}s{% endif %})</span>
+                    {% else %}
+                        <span class="badge bg-danger">Rupture de stock</span>
+                    {% endif %}
+                </div>
+                
+                <div class="product-actions mt-3">
+                    {% if produit.stock > 0 %}
+                        <a href="index.php?action=add_to_cart&id={{ produit.id }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-cart-plus"></i> Ajouter au panier
+                        </a>
+                    {% endif %}
+                </div>
+                
+                {# Note moyenne #}
+                {% if moyenne_note %}
+                    <div class="rating mt-3">
+                        <strong>Note moyenne :</strong> 
+                        {{ moyenne_note|number_format(1) }}/5 
+                        {% for i in 1..5 %}
+                            {% if i <= moyenne_note %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# US-21 : Avis #}
+    <section class="reviews-section mt-4">
+        <h2>Avis clients</h2>
+        
+        {% if user_logged_in and user_has_bought %}
+            <form action="index.php?action=add_review" method="POST" class="review-form mb-3 card p-3">
+                <h5>Donnez votre avis</h5>
+                <input type="hidden" name="product_id" value="{{ produit.id }}">
+                <div class="form-group mb-2">
+                    <label for="rating">Note</label>
+                    <select id="rating" name="rating" class="form-control w-auto" required>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ Très bien</option>
+                        <option value="3">⭐⭐⭐ Bien</option>
+                        <option value="2">⭐⭐ Moyen</option>
+                        <option value="1">⭐ Décevant</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label for="comment">Commentaire</label>
+                    <textarea id="comment" name="comment" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Publier mon avis</button>
+            </form>
+        {% elseif user_logged_in %}
+            <p class="text-muted">Vous devez acheter ce produit pour pouvoir laisser un avis.</p>
+        {% else %}
+            <p><a href="index.php?action=login">Connectez-vous</a> pour laisser un avis (après achat).</p>
+        {% endif %}
+        
+        <div class="reviews-list">
+            {% if avis is defined and avis|length > 0 %}
+                {% for review in avis %}
+                    <div class="review-card card mb-2 p-3">
+                        <div class="review-header d-flex justify-content-between">
+                            <strong>{{ review.username }}</strong>
+                            <span>
+                                {% for i in 1..5 %}
+                                    {% if i <= review.rating %}⭐{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <small class="text-muted">le {{ review.created_at|date('d/m/Y') }}</small>
+                        {% if review.comment %}
+                            <div class="review-body mt-2">
+                                {{ review.comment|nl2br }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucun avis pour le moment.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

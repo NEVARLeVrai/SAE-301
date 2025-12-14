@@ -1,0 +1,79 @@
+{#
+    ===========================================
+    PAGE D'ACCUEIL - OmniMusique (US-11)
+    ===========================================
+    Affiche les catégories principales et les dernières nouveautés.
+    Variables attendues : latestCours, latestArticles, latestProducts
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Accueil{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center mb-5">
+    <h1>Bienvenue sur OmniMusique</h1>
+    <p>Votre plateforme dédiée à l'apprentissage et à la pratique musicale.</p>
+</div>
+
+{# Catégories (US-14) #}
+<div class="categories-grid mb-8">
+    <a href="index.php?action=cours" class="card text-center">
+        <h3>🎵 Cours</h3>
+        <p>Apprenez un instrument</p>
+    </a>
+    <a href="index.php?action=boutique" class="card text-center">
+        <h3>🛒 Boutique</h3>
+        <p>Partitions & Instruments</p>
+    </a>
+    <a href="index.php?action=blog" class="card text-center">
+        <h3>📰 Blog</h3>
+        <p>Actualités & Conseils</p>
+    </a>
+    <a href="index.php?action=contact" class="card text-center">
+        <h3>✉️ Contact</h3>
+        <p>Petites annonces</p>
+    </a>
+</div>
+
+{# Dernières Nouveautés (US-11) #}
+<section class="mb-4">
+    <h2>Dernières Actualités</h2>
+    <div class="grid-3">
+        {% if derniers_articles is defined and derniers_articles|length > 0 %}
+            {% for article in derniers_articles %}
+                <div class="card">
+                    {% if article.image_url %}
+                        <img src="../../assets/{{ article.image_url }}" alt="Image article" class="article-card-img">
+                    {% endif %}
+                    <h3>{{ article.title }}</h3>
+                    <small>Par {{ article.author|default('Anonyme') }} le {{ article.created_at|date('d/m/Y') }}</small>
+                    <p>{{ article.content|striptags|slice(0, 100) }}...</p>
+                    <a href="index.php?action=article_details&id={{ article.id }}" class="btn-small">Lire la suite</a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="text-center mt-1">
+        <a href="index.php?action=blog" class="btn">Voir tout le blog</a>
+    </div>
+</section>
+
+<section class="mb-2">
+    <h2>Nouveaux Cours</h2>
+    <div class="grid-3">
+        {% if derniers_cours is defined and derniers_cours|length > 0 %}
+            {% for cours in derniers_cours %}
+                <div class="card">
+                    <h3>{{ cours.title }}</h3>
+                    <p><strong>Instrument:</strong> {{ cours.instrument }}</p>
+                    <p><strong>Niveau:</strong> {{ cours.level }}</p>
+                    <a href="index.php?action=cours_details&id={{ cours.id }}" class="btn-small">Voir le cours</a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="text-center mt-1">
+        <a href="index.php?action=cours" class="btn">Voir tous les cours</a>
+    </div>
+</section>
+{% endblock %}

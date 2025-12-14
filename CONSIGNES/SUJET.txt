@@ -53,9 +53,6 @@ Rendus
 11. Un syst�me de v�rification des envois sera disponible en fin de projet.
 Si vous avez cr�� des utilisateurs ou un compte admin avec des fonctionalit�s sp�cifiques, pensez � me fournir les identifiants et mots de passe pour que je puisse tester votre site. Vous pouvez mettre les informations utiles dans un fichier README � la racine du projet (dans le ZIP).
 
-je ne vais pas utiliser TWIG
-
-
 Important : pour être validés et évalués les codes rendus doivent respecter les consignes et bonnes pratiques vues en cours :
 
 encapsulation des données :

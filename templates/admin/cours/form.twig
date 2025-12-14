@@ -1,0 +1,63 @@
+{% extends "base.twig" %}
+
+{% block title %} - {{ cours is defined ? 'Modifier le Cours' : 'Nouveau Cours' }}{% endblock %}
+
+{% block content %}
+<h1>{{ cours is defined ? 'Modifier le Cours' : 'Nouveau Cours' }}</h1>
+
+<form method="POST" action="index.php?action={{ cours is defined ? 'edit_cours' : 'create_cours' }}" class="admin-form">
+    {% if cours is defined %}
+        <input type="hidden" name="id" value="{{ cours.id }}">
+    {% endif %}
+
+    <div class="form-group">
+        <label for="title">Titre du cours *</label>
+        <input type="text" id="title" name="title" 
+               value="{{ cours.title|default('') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description courte *</label>
+        <textarea id="description" name="description" rows="3" required>{{ cours.description|default('') }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Contenu du cours (HTML ou lien vidéo)</label>
+        <textarea id="content" name="content" rows="8" class="admin-textarea-large">{{ cours.content|default('') }}</textarea>
+        <small class="text-muted">Vous pouvez inclure du HTML, des liens YouTube embed, etc.</small>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="instrument">Instrument *</label>
+            <input type="text" id="instrument" name="instrument" 
+                   value="{{ cours.instrument|default('') }}" 
+                   placeholder="Ex: Piano, Guitare..." required>
+        </div>
+
+        <div class="form-group">
+            <label for="level">Niveau *</label>
+            <select id="level" name="level" required>
+                <option value="">-- Choisir --</option>
+                <option value="debutant" {{ (cours is defined and cours.level == 'debutant') ? 'selected' : '' }}>🟢 Débutant</option>
+                <option value="intermediaire" {{ (cours is defined and cours.level == 'intermediaire') ? 'selected' : '' }}>🟡 Intermédiaire</option>
+                <option value="avance" {{ (cours is defined and cours.level == 'avance') ? 'selected' : '' }}>🟢 Avancé</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Catégorie / Style *</label>
+            <input type="text" id="category" name="category" 
+                   value="{{ cours.category|default('') }}" 
+                   placeholder="Ex: Classique, Jazz, Rock..." required>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn">
+            {{ cours is defined ? 'Mettre à jour' : 'Créer le cours' }}
+        </button>
+        <a href="index.php?action=cours" class="btn btn-outline">Annuler</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,79 @@
+{#
+    ===========================================
+    VENTE D'INSTRUMENT D'OCCASION (US-04)
+    ===========================================
+    Formulaire de dépôt d'annonce pour vente.
+    Variables : success, error, user_logged_in
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Vendre un instrument{% endblock %}
+
+{% block content %}
+<h1>Vendre un instrument d'occasion</h1>
+<p>Proposez votre matériel à la communauté.</p>
+
+{% if success is defined and success %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle me-2"></i>{{ success }}
+    </div>
+{% endif %}
+
+{% if error is defined and error %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+{% endif %}
+
+<div class="card p-4">
+    <form action="index.php?action=sell_instrument" method="POST" enctype="multipart/form-data">
+        <div class="form-group mb-3">
+            <label for="name"><i class="bi bi-tag"></i> Nom de l'instrument *</label>
+            <input type="text" id="name" name="name" class="form-control" required placeholder="Ex: Guitare acoustique Yamaha">
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="description"><i class="bi bi-text-paragraph"></i> Description *</label>
+            <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Décrivez l'état, l'année d'achat, les accessoires inclus..."></textarea>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="price"><i class="bi bi-currency-euro"></i> Prix (€) *</label>
+                    <input type="number" id="price" name="price" class="form-control" min="0" step="0.01" required placeholder="150.00">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="category"><i class="bi bi-folder"></i> Catégorie</label>
+                    <select id="category" name="category" class="form-control">
+                        <option value="Guitare">Guitare</option>
+                        <option value="Piano/Clavier">Piano/Clavier</option>
+                        <option value="Percussion">Percussion</option>
+                        <option value="Vent">Instrument à vent</option>
+                        <option value="Cordes">Cordes</option>
+                        <option value="Accessoire">Accessoire</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="image"><i class="bi bi-image"></i> Photo (JPG/PNG, max 5 Mo)</label>
+            <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/png">
+            <small class="text-muted">Une belle photo augmente vos chances de vente !</small>
+        </div>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Votre annonce sera soumise à validation par un administrateur avant d'être publiée.
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-megaphone"></i> Soumettre mon annonce
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.twig' %}
+
+{% block title %} - Devenir contributeur{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-person-plus"></i> Devenir contributeur</h1>
+<p>Rejoignez notre communauté de créateurs !</p>
+
+{% if success is defined and success %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle me-2"></i>{{ success }}
+    </div>
+{% endif %}
+
+{% if error is defined and error %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card p-4 mb-3">
+            <h3><i class="bi bi-pen"></i> Rédacteur</h3>
+            <p>En tant que rédacteur, vous pourrez :</p>
+            <ul>
+                <li>Publier des articles sur le blog</li>
+                <li>Modérer les commentaires sur vos articles</li>
+                <li>Partager votre passion avec la communauté</li>
+            </ul>
+            
+            {% if hasPending %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-clock me-2"></i>Vous avez déjà une demande en attente.
+                </div>
+            {% else %}
+                <form action="index.php?action=request_role" method="POST">
+                    <input type="hidden" name="requested_role" value="redacteur">
+                    <div class="form-group mb-3">
+                        <label for="motivation_redacteur">Pourquoi voulez-vous devenir rédacteur ?</label>
+                        <textarea id="motivation_redacteur" name="motivation" class="form-control" rows="3" required placeholder="Décrivez votre expérience, vos sujets de prédilection..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Demander le rôle Rédacteur
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card p-4 mb-3">
+            <h3><i class="bi bi-music-note-beamed"></i> Musicien Professionnel</h3>
+            <p>En tant que musicien professionnel, vous pourrez :</p>
+            <ul>
+                <li>Vendre vos compositions musicales</li>
+                <li>Proposer vos partitions</li>
+                <li>Consulter vos statistiques de vente</li>
+            </ul>
+            
+            {% if hasPending %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-clock me-2"></i>Vous avez déjà une demande en attente.
+                </div>
+            {% else %}
+                <form action="index.php?action=request_role" method="POST">
+                    <input type="hidden" name="requested_role" value="musicien">
+                    <div class="form-group mb-3">
+                        <label for="motivation_musicien">Pourquoi voulez-vous devenir musicien professionnel ?</label>
+                        <textarea id="motivation_musicien" name="motivation" class="form-control" rows="3" required placeholder="Décrivez votre parcours musical, vos créations..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Demander le rôle Musicien
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if myRequests|length > 0 %}
+    <div class="card p-4 mt-3">
+        <h3>Historique de vos demandes</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Rôle demandé</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in myRequests %}
+                    <tr>
+                        <td>{{ request.requested_role == 'redacteur' ? 'Rédacteur' : 'Musicien' }}</td>
+                        <td>{{ request.created_at|date('d/m/Y H:i') }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% elseif request.status == 'approved' %}
+                                <span class="badge bg-success">Approuvée</span>
+                            {% else %}
+                                <span class="badge bg-danger">Refusée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}

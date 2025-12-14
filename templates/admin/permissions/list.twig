@@ -1,0 +1,76 @@
+{#
+    ===========================================
+    ADMIN - MATRICE DES PERMISSIONS (US-30)
+    ===========================================
+    Définition fine des permissions par rôle.
+    Variables : permissionData (roles, permissions, matrix), labels
+#}
+{% extends "base.twig" %}
+
+{% block title %} - Permissions{% endblock %}
+
+{% block content %}
+<h1>Matrice des Permissions</h1>
+<p>Définissez finement les permissions de chaque rôle.</p>
+
+{% if success is defined and success %}
+    <div class="alert alert-success">{{ success }}</div>
+{% endif %}
+
+<form action="index.php?action=permissions" method="POST" class="form-full-width">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Permission</th>
+                    {% for role in permissionData.roles %}
+                        <th class="text-center">
+                            {{ role|capitalize }}
+                            {% if role == 'admin' %}
+                                ⭐
+                            {% endif %}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in permissionData.permissions %}
+                    <tr>
+                        <td>
+                            <strong>{{ labels[permission] ?? permission }}</strong>
+                            <br><small class="text-muted">{{ permission }}</small>
+                        </td>
+                        {% for role in permissionData.roles %}
+                            {% set fieldName = role ~ '_' ~ permission %}
+                            {% set isChecked = permissionData.matrix[role][permission] is defined and permissionData.matrix[role][permission] %}
+                            <td class="text-center">
+                                <input type="checkbox" 
+                                       name="{{ fieldName }}" 
+                                       id="{{ fieldName }}"
+                                       {{ isChecked ? 'checked' : '' }}
+                                       {{ role == 'admin' ? 'disabled checked' : '' }}>
+                                {% if role == 'admin' %}
+                                    <input type="hidden" name="{{ fieldName }}" value="1">
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+<div class="form-group mt-1-5">
+    <button type="submit" class="btn">Enregistrer les modifications</button>
+</div>
+</form>
+
+<div class="admin-card mt-1-5">
+    <h3>Légende</h3>
+    <ul>
+        <li><strong>Admin</strong> : Toutes les permissions sont activées par défaut (non modifiable)</li>
+        <li><strong>Rédacteur</strong> : Peut gérer les articles et modérer le contenu</li>
+        <li><strong>Musicien</strong> : Peut gérer ses cours et produits, voir ses statistiques</li>
+    </ul>
+</div>
+{% endblock %}

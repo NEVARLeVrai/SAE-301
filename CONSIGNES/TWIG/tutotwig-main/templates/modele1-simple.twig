@@ -1,0 +1,23 @@
+{% extends "base.twig" %}
+
+{# Ce modèle TWIG étend le modèle 'base.twig' : il contient tous les éléments fixes
+et un bloc main dont le contenu est spécialisé pour afficher un livre #}
+
+{% block main %}
+<div class="block-fils">
+	<p>Les blocks "fils" ont un fond vert clair et sont entourés de pointillés verts</p>
+	<h1>Un modèle de page enrichissant le bloc main du modèle de base</h1>
+	<h2>Affichage d'un livre</h2>
+	<div class="livre">
+		<h2>{{ livre.titre }}</h2>
+		<p>Numéro ISBN : {{ livre.isbn }}</p>
+		<p>Prix : {{ livre.prix }} € HT - {{ livre.prix * 1.2 }} € TTC</p>
+		<p>Editeur :
+			<a href="#">{{ livre.editeur }}</a>
+		</p>
+		<p>Résumé :</p>
+		{# ci-dessous on utilis le filtre nl2br pour remplacer les sauts de lignes par des balises <br> #}
+		<p class="resume">{{ livre.resume|nl2br }}</p>
+	</div>
+</div>
+{% endblock main %}

@@ -1,0 +1,59 @@
+{% extends 'base.twig' %}
+
+{% block title %} - Mes commandes{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-receipt"></i> Mes commandes</h1>
+
+{% if orders|length > 0 %}
+    <div class="orders-list">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Référence</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td><strong>#{{ order.id }}</strong></td>
+                        <td>{{ order.created_at|date('d/m/Y H:i') }}</td>
+                        <td>{{ order.total_amount|number_format(2, ',', ' ') }} €</td>
+                        <td>
+                            {% if order.status == 'paid' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% elseif order.status == 'pending' %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% elseif order.status == 'shipped' %}
+                                <span class="badge bg-info">Expédiée</span>
+                            {% elseif order.status == 'delivered' %}
+                                <span class="badge bg-primary">Livrée</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ order.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {# Bouton téléchargement si produits numériques #}
+                            {% if order.has_digital %}
+                                <a href="index.php?action=download&id={{ order.id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download"></i> Télécharger
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-bag-x fs-1 d-block mb-2"></i>
+        <p>Vous n'avez pas encore passé de commande.</p>
+        <a href="index.php?action=boutique" class="btn btn-primary">Découvrir notre boutique</a>
+    </div>
+{% endif %}
+{% endblock %}

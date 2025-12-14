@@ -1,0 +1,63 @@
+{#
+    ===========================================
+    DASHBOARD ADMIN - OmniMusique (US-08)
+    ===========================================
+    Tableau de bord avec statistiques selon le rôle.
+    Variables : admin_name, admin_role, nbArticles, nbCours, nbProduits, etc.
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Dashboard{% endblock %}
+
+{% block content %}
+<h1>Tableau de bord</h1>
+<p>Bienvenue, <strong>{{ admin_name|default('Utilisateur') }}</strong>.</p>
+
+<div class="dashboard-stats">
+    {% if admin_role == 'admin' %}
+        <div class="admin-card text-center">
+            <h3>Articles</h3>
+            <p class="stat-number text-secondary">{{ nbArticles|default(0) }}</p>
+            <a href="index.php?action=articles" class="btn-small">Gérer</a>
+        </div>
+        <div class="admin-card text-center">
+            <h3>Cours</h3>
+            <p class="stat-number text-accent">{{ nbCours|default(0) }}</p>
+            <a href="index.php?action=cours" class="btn-small">Gérer</a>
+        </div>
+        <div class="admin-card text-center">
+            <h3>Produits</h3>
+            <p class="stat-number text-success">{{ nbProduits|default(0) }}</p>
+            <a href="index.php?action=produits" class="btn-small">Gérer</a>
+        </div>
+    {% elseif admin_role == 'redacteur' %}
+        <div class="admin-card text-center">
+            <h3>Mes Articles</h3>
+            <p class="stat-number text-secondary">{{ nbArticles|default(0) }}</p>
+            <a href="index.php?action=articles" class="btn-small">Gérer</a>
+        </div>
+        <div class="admin-card text-center">
+            <h3>Modération Commentaires</h3>
+            <p class="text-muted">Sur vos articles</p>
+            <a href="index.php?action=comments" class="btn-small">Modérer</a>
+        </div>
+    {% elseif admin_role == 'musicien' %}
+        <div class="admin-card text-center">
+            <h3>Mes Produits</h3>
+            <p class="stat-number text-success">{{ nbProduits|default(0) }}</p>
+            <a href="index.php?action=produits" class="btn-small">Gérer</a>
+        </div>
+        <div class="mt-2">
+            <h2>Mes Statistiques de Vente (US-33)</h2>
+            <p>Chiffre d'affaires total : <strong>{{ caTotal|default(0)|number_format(2, ',', ' ') }} €</strong></p>
+        </div>
+    {% else %}
+        <p>Vous n'avez pas accès au tableau de bord.</p>
+    {% endif %}
+</div>
+
+<div class="mt-2">
+    <h2>Activités récentes</h2>
+    <p>Aucune activité récente.</p>
+</div>
+{% endblock %}

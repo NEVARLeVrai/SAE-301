@@ -1,0 +1,12 @@
+{
+    "name": "omnimusique/sae-301",
+    "description": "Site de partage et d'échange sur la musique - SAE 301",
+    "require": {
+        "twig/twig": "^3.22"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "modeles/"
+        }
+    }
+}

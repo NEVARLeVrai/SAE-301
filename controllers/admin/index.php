@@ -12,9 +12,16 @@
  * Respect des consignes :
  * - Encapsulation : données POST traitées dans les classes
  * - Séparation MVC : contrôleur gère le routage, modèles gèrent les données
+ * - Templates Twig pour l'affichage des vues
  */
 
 session_start();
+
+// ===========================================
+// INITIALISATION TWIG
+// ===========================================
+include_once '../../include/twig.php';
+$twig = init_twig();
 
 // ===========================================
 // INCLUSION DES MODÈLES (Connexion BDD unique)
@@ -62,7 +69,7 @@ if ($action == 'login') {
         $validator = new Validator();
         if (!$validator->validateLogin($email, $password)) {
             $error = $validator->getErrorsString();
-            include '../../vues/admin/login.php';
+            echo $twig->render('admin/login.twig', ['error' => $error]);
         } else {
             // Les données POST sont traitées dans la classe (encapsulation)
             $user = new User($db);
@@ -78,7 +85,7 @@ if ($action == 'login') {
                     exit;
                 } else {
                     $error = "Accès refusé. Vous n'avez pas les droits d'administration.";
-                    include '../../vues/admin/login.php';
+                    echo $twig->render('admin/login.twig', ['error' => $error]);
                 }
             } else {
                 // Vérifier s'il y a des erreurs de validation
@@ -88,12 +95,12 @@ if ($action == 'login') {
                 } else {
                     $error = "Identifiants incorrects.";
                 }
-                include '../../vues/admin/login.php';
+                echo $twig->render('admin/login.twig', ['error' => $error]);
             }
         }
     } else {
         // Affichage du formulaire de login (PAS DE HEADER GLOBAL)
-        include '../../vues/admin/login.php';
+        echo $twig->render('admin/login.twig', []);
     }
     exit; // On arrête le script ici pour ne pas charger le reste
 }
@@ -642,12 +649,17 @@ if ($action === 'export_pdf') {
     exit;
 }
 
-// --- ZONE PROTÉGÉE (HEADER ADMIN) ---
-$isAdmin = true; // Variable pour indiquer au header qu'on est en mode admin
-include '../../vues/global/header.php';
+// --- ZONE PROTÉGÉE ---
+// Variables communes pour Twig
+$twigVars = [
+    'is_admin' => true,
+    'admin_role' => $_SESSION['admin_role'],
+    'admin_name' => $_SESSION['admin_name'],
+    'admin_id' => $_SESSION['admin_id']
+];
 
 // ===========================================
-// ROUTAGE PRINCIPAL - Affichage des vues admin
+// ROUTAGE PRINCIPAL - Rendu avec Twig
 // ===========================================
 switch ($action) {
     // US-08 : Dashboard avec supervision globale
@@ -670,15 +682,21 @@ switch ($action) {
             });
             $nbProduits = count($myProducts);
             
-            // Calcul du CA (Simplifié : on suppose que toutes les commandes 'paid' contenant ses produits sont comptées)
-            // Pour faire ça proprement il faudrait une méthode dans Order.php qui joint order_items et products
+            // Calcul du CA
             $orderModel = new Order($db);
             $caTotal = $orderModel->getSalesBySeller($_SESSION['admin_id']);
         } else {
             $nbProduits = $produitModel->count();
+            $caTotal = null;
         }
         
-        include '../../vues/admin/dashboard.php';
+        echo render_template($twig, 'admin/dashboard.twig', array_merge($twigVars, [
+            'nbArticles' => $nbArticles,
+            'nbCours' => $nbCours,
+            'nbProduits' => $nbProduits,
+            'caTotal' => $caTotal,
+            'breadcrumbs' => ['Dashboard' => 'index.php?action=dashboard']
+        ]));
         break;
 
     // --- GESTION DES ARTICLES (US-06) ---
@@ -689,18 +707,29 @@ switch ($action) {
         $articleModel = new Article($db);
         // Admin voit tout (status = 'all')
         $liste_articles = $articleModel->getArticles(null, 'all');
-        include '../../vues/admin/articles/list.php';
+        echo render_template($twig, 'admin/articles/list.twig', array_merge($twigVars, [
+            'liste_articles' => $liste_articles,
+            'breadcrumbs' => ['Articles' => 'index.php?action=articles']
+        ]));
         break;
 
     case 'create_article':
         // Le traitement POST est fait avant le header
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Erreur lors de la création.";
         }
         // US-28 : Récupérer tous les tags pour le formulaire
         $tagModel = new Tag($db);
         $allTags = $tagModel->getAll();
-        include '../../vues/admin/articles/form.php';
+        echo render_template($twig, 'admin/articles/form.twig', array_merge($twigVars, [
+            'allTags' => $allTags,
+            'error' => $error,
+            'breadcrumbs' => [
+                'Articles' => 'index.php?action=articles',
+                'Créer' => ''
+            ]
+        ]));
         break;
 
     case 'edit_article':
@@ -719,7 +748,15 @@ switch ($action) {
             $allTags = $tagModel->getAll();
             $articleTagIds = $tagModel->getArticleTagIds($_GET['id']);
 
-            include '../../vues/admin/articles/form.php';
+            echo render_template($twig, 'admin/articles/form.twig', array_merge($twigVars, [
+                'article' => $article,
+                'allTags' => $allTags,
+                'articleTagIds' => $articleTagIds,
+                'breadcrumbs' => [
+                    'Articles' => 'index.php?action=articles',
+                    'Modifier' => ''
+                ]
+            ]));
         }
         break;
 
@@ -735,7 +772,10 @@ switch ($action) {
                 return $p['seller_id'] == $_SESSION['admin_id'];
             });
         }
-        include '../../vues/admin/produits/list.php';
+        echo render_template($twig, 'admin/produits/list.twig', array_merge($twigVars, [
+            'liste_produits' => $liste_produits,
+            'breadcrumbs' => ['Produits' => 'index.php?action=produits']
+        ]));
         break;
 
     case 'create_produit':
@@ -743,10 +783,17 @@ switch ($action) {
             die("Accès refusé.");
         }
         // Le traitement POST est fait avant le header
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Erreur lors de la création.";
         }
-        include '../../vues/admin/produits/form.php';
+        echo render_template($twig, 'admin/produits/form.twig', array_merge($twigVars, [
+            'error' => $error,
+            'breadcrumbs' => [
+                'Produits' => 'index.php?action=produits',
+                'Créer' => ''
+            ]
+        ]));
         break;
 
     case 'edit_produit':
@@ -763,7 +810,13 @@ switch ($action) {
                 die("Accès refusé : Vous ne pouvez modifier que vos propres produits.");
             }
 
-            include '../../vues/admin/produits/form.php';
+            echo render_template($twig, 'admin/produits/form.twig', array_merge($twigVars, [
+                'produit' => $produit,
+                'breadcrumbs' => [
+                    'Produits' => 'index.php?action=produits',
+                    'Modifier' => ''
+                ]
+            ]));
         }
         break;
 
@@ -773,6 +826,7 @@ switch ($action) {
             die("Accès refusé.");
         }
         $configModel = new Configuration($db);
+        $success = null;
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($_POST as $key => $value) {
@@ -782,7 +836,11 @@ switch ($action) {
         }
         
         $configs = $configModel->getAll();
-        include '../../vues/admin/configurations.php';
+        echo render_template($twig, 'admin/configurations.twig', array_merge($twigVars, [
+            'configs' => $configs,
+            'success' => $success,
+            'breadcrumbs' => ['Configurations' => 'index.php?action=configurations']
+        ]));
         break;
 
     // --- COMMANDES (US-08) ---
@@ -792,7 +850,10 @@ switch ($action) {
         }
         $orderModel = new Order($db);
         $orders = $orderModel->getAllOrders();
-        include '../../vues/admin/orders/list.php';
+        echo render_template($twig, 'admin/orders/list.twig', array_merge($twigVars, [
+            'orders' => $orders,
+            'breadcrumbs' => ['Commandes' => 'index.php?action=orders']
+        ]));
         break;
 
     // --- GESTION DES TAGS (US-28) ---
@@ -809,7 +870,10 @@ switch ($action) {
         }
 
         $tags = $tagModel->getAll();
-        include '../../vues/admin/tags/list.php';
+        echo render_template($twig, 'admin/tags/list.twig', array_merge($twigVars, [
+            'tags' => $tags,
+            'breadcrumbs' => ['Tags' => 'index.php?action=tags']
+        ]));
         break;
 
     // --- GESTION UTILISATEURS (US-26) ---
@@ -819,7 +883,10 @@ switch ($action) {
         }
         $userModel = new User($db);
         $users = $userModel->getAllUsers();
-        include '../../vues/admin/users/list.php';
+        echo render_template($twig, 'admin/users/list.twig', array_merge($twigVars, [
+            'users' => $users,
+            'breadcrumbs' => ['Utilisateurs' => 'index.php?action=users']
+        ]));
         break;
 
     case 'edit_user':
@@ -827,6 +894,7 @@ switch ($action) {
             die("Accès refusé.");
         }
         $userModel = new User($db);
+        $error = null;
         
         // Le traitement POST est fait avant le header
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$userModel->updateFromPost()) {
@@ -835,7 +903,14 @@ switch ($action) {
         
         if (isset($_GET['id'])) {
             $user = $userModel->getUserById($_GET['id']);
-            include '../../vues/admin/users/form.php';
+            echo render_template($twig, 'admin/users/form.twig', array_merge($twigVars, [
+                'user' => $user,
+                'error' => $error,
+                'breadcrumbs' => [
+                    'Utilisateurs' => 'index.php?action=users',
+                    'Modifier' => ''
+                ]
+            ]));
         }
         break;
 
@@ -846,7 +921,10 @@ switch ($action) {
         }
         $coursModel = new Cours($db);
         $liste_cours = $coursModel->getCourses();
-        include '../../vues/admin/cours/list.php';
+        echo render_template($twig, 'admin/cours/list.twig', array_merge($twigVars, [
+            'liste_cours' => $liste_cours,
+            'breadcrumbs' => ['Cours' => 'index.php?action=cours']
+        ]));
         break;
 
     case 'create_cours':
@@ -854,10 +932,17 @@ switch ($action) {
             die("Accès refusé.");
         }
         // Le traitement POST est fait avant le header
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Erreur lors de la création.";
         }
-        include '../../vues/admin/cours/form.php';
+        echo render_template($twig, 'admin/cours/form.twig', array_merge($twigVars, [
+            'error' => $error,
+            'breadcrumbs' => [
+                'Cours' => 'index.php?action=cours',
+                'Créer' => ''
+            ]
+        ]));
         break;
 
     case 'edit_cours':
@@ -868,7 +953,13 @@ switch ($action) {
         // Le traitement POST est fait avant le header
         if (isset($_GET['id'])) {
             $cours_edit = $coursModel->getCourseById($_GET['id']);
-            include '../../vues/admin/cours/form.php';
+            echo render_template($twig, 'admin/cours/form.twig', array_merge($twigVars, [
+                'cours' => $cours_edit,
+                'breadcrumbs' => [
+                    'Cours' => 'index.php?action=cours',
+                    'Modifier' => ''
+                ]
+            ]));
         }
         break;
 
@@ -896,7 +987,11 @@ switch ($action) {
             $comments = $allComments;
         }
         
-        include '../../vues/admin/comments/list.php';
+        echo render_template($twig, 'admin/comments/list.twig', array_merge($twigVars, [
+            'comments' => $comments,
+            'filter' => $filter,
+            'breadcrumbs' => ['Commentaires' => 'index.php?action=comments']
+        ]));
         break;
 
     // --- NOTIFICATIONS (US-29) ---
@@ -906,7 +1001,10 @@ switch ($action) {
         }
         $notificationModel = new Notification($db);
         $notifications = $notificationModel->getByUser($_SESSION['admin_id']);
-        include '../../vues/admin/notifications/list.php';
+        echo render_template($twig, 'admin/notifications/list.twig', array_merge($twigVars, [
+            'notifications' => $notifications,
+            'breadcrumbs' => ['Notifications' => 'index.php?action=notifications']
+        ]));
         break;
 
     // ==========================================
@@ -919,7 +1017,11 @@ switch ($action) {
         $roleRequestModel = new RoleRequest($db);
         $pendingRequests = $roleRequestModel->getPendingRequests();
         $allRequests = $roleRequestModel->getAllRequests();
-        include '../../vues/admin/role_requests/list.php';
+        echo render_template($twig, 'admin/role_requests/list.twig', array_merge($twigVars, [
+            'pendingRequests' => $pendingRequests,
+            'allRequests' => $allRequests,
+            'breadcrumbs' => ['Demandes de rôle' => 'index.php?action=role_requests']
+        ]));
         break;
 
     // ==========================================
@@ -932,7 +1034,11 @@ switch ($action) {
         $mreqModel = new ModerationRequest($db);
         $pendingMreqs = $mreqModel->getPendingRequests();
         $allMreqs = $mreqModel->getAllRequests();
-        include '../../vues/admin/moderation_requests/list.php';
+        echo render_template($twig, 'admin/moderation_requests/list.twig', array_merge($twigVars, [
+            'pendingMreqs' => $pendingMreqs,
+            'allMreqs' => $allMreqs,
+            'breadcrumbs' => ['Modération' => 'index.php?action=moderation_requests']
+        ]));
         break;
 
     // ==========================================
@@ -943,6 +1049,7 @@ switch ($action) {
             die("Accès refusé.");
         }
         $permissionModel = new Permission($db);
+        $success = null;
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $permissionModel->updateFromMatrix($_POST);
@@ -950,7 +1057,11 @@ switch ($action) {
         }
         
         $permissionData = $permissionModel->getPermissionMatrix();
-        include '../../vues/admin/permissions/list.php';
+        echo render_template($twig, 'admin/permissions/list.twig', array_merge($twigVars, [
+            'permissionData' => $permissionData,
+            'success' => $success,
+            'breadcrumbs' => ['Permissions' => 'index.php?action=permissions']
+        ]));
         break;
 
     // ==========================================
@@ -972,8 +1083,18 @@ switch ($action) {
         $salesByCategory = $rapportModel->getSalesByCategory($date_start, $date_end);
         $recentOrders = $rapportModel->getRecentOrders($date_start, $date_end);
         
-        include '../../vues/admin/reports/index.php';
+        echo render_template($twig, 'admin/reports/index.twig', array_merge($twigVars, [
+            'stats' => $stats,
+            'salesByCategory' => $salesByCategory,
+            'recentOrders' => $recentOrders,
+            'date_start' => $date_start,
+            'date_end' => $date_end,
+            'breadcrumbs' => ['Rapports' => 'index.php?action=reports']
+        ]));
         break;
 
-    }
-include '../../vues/global/footer.php';
+    default:
+        // Redirection vers dashboard par défaut
+        header('Location: index.php?action=dashboard');
+        exit;
+}

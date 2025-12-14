@@ -1,0 +1,40 @@
+{#
+    ===========================================
+    ADMIN - MODÉRATION DES PRODUITS (US-10)
+    ===========================================
+    Validation/rejet des annonces de vente.
+    Variables : pendingProducts, admin_role
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Modération{% endblock %}
+
+{% block content %}
+<h1>Demandes de modération</h1>
+
+<h2>En attente</h2>
+{% if pendingMreqs is defined and pendingMreqs|length > 0 %}
+    <ul>
+    {% for r in pendingMreqs %}
+        <li>
+            #{{ r.id }} - {{ r.product_name|default('Produit') }} (par {{ r.username|default('Utilisateur supprimé') }})
+            - <a href="index.php?action=approve_mreq&id={{ r.id }}">Approuver</a>
+            - <a href="index.php?action=reject_mreq&id={{ r.id }}">Rejeter</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucune demande en attente.</p>
+{% endif %}
+
+<h2>Historique</h2>
+{% if allMreqs is defined and allMreqs|length > 0 %}
+    <ul>
+    {% for r in allMreqs %}
+        <li>#{{ r.id }} - {{ r.product_name|default('Produit') }} - {{ r.status }} - demandé par {{ r.username|default('Supprimé') }}{% if r.processed_by_name %} - traité par {{ r.processed_by_name }}{% endif %}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucun historique.</p>
+{% endif %}
+{% endblock %}

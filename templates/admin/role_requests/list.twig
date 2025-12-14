@@ -1,0 +1,107 @@
+{% extends 'base.twig' %}
+
+{% block title %} - Demandes de rôle{% endblock %}
+
+{% block content %}
+<h1>Demandes de rôle</h1>
+<p>Validez ou refusez les demandes de promotion des utilisateurs.</p>
+
+{% if success is defined and success %}
+    <div class="alert alert-success">{{ success }}</div>
+{% endif %}
+
+{# Demandes en attente #}
+<div class="admin-card mb-3">
+    <h3>En attente de validation</h3>
+    
+    {% if pendingRequests is defined and pendingRequests|length > 0 %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Email</th>
+                        <th>Rôle demandé</th>
+                        <th>Motivation</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in pendingRequests %}
+                        <tr>
+                            <td><strong>{{ request.username }}</strong></td>
+                            <td>{{ request.email }}</td>
+                            <td>
+                                <span class="badge badge-info">
+                                    {{ request.requested_role|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ request.motivation|default('Non spécifié') }}</td>
+                            <td>{{ request.created_at|date('d/m/Y H:i') }}</td>
+                            <td class="actions">
+                                <a href="index.php?action=approve_role_request&id={{ request.id }}" 
+                                   class="btn-small btn-success" 
+                                   onclick="return confirm('Approuver cette demande ? L\'utilisateur deviendra {{ request.requested_role }}.');">
+                                    Approuver
+                                </a>
+                                <a href="index.php?action=reject_role_request&id={{ request.id }}" 
+                                   class="btn-small btn-danger"
+                                   onclick="return confirm('Rejeter cette demande ?');">
+                                    Rejeter
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">Aucune demande en attente.</p>
+    {% endif %}
+</div>
+
+{# Historique #}
+<div class="admin-card">
+    <h3>Historique des demandes</h3>
+    
+    {% if allRequests is defined and allRequests|length > 0 %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Rôle demandé</th>
+                        <th>Statut</th>
+                        <th>Date demande</th>
+                        <th>Traité par</th>
+                        <th>Date traitement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in allRequests %}
+                        <tr>
+                            <td>{{ request.username }}</td>
+                            <td>{{ request.requested_role|capitalize }}</td>
+                            <td>
+                                {% if request.status == 'pending' %}
+                                    <span class="badge badge-warning">En attente</span>
+                                {% elseif request.status == 'approved' %}
+                                    <span class="badge badge-success">Approuvé</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Rejeté</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ request.created_at|date('d/m/Y') }}</td>
+                            <td>{{ request.processed_by_name|default('-') }}</td>
+                            <td>{{ request.processed_at ? request.processed_at|date('d/m/Y') : '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">Aucune demande dans l'historique.</p>
+    {% endif %}
+</div>
+{% endblock %}

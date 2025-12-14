@@ -259,7 +259,8 @@ h1 {
 .card .btn,
 .cours-card .btn-small,
 .article-card .btn-small,
-.product-card .btn-small {
+.product-card .btn-small,
+.product-card .product-actions {
     margin-top: auto;
 }
 
@@ -429,6 +430,17 @@ form {
     max-width: 600px;
     margin: 0 auto;
     border: 1px solid #e2e8f0;
+}
+
+/* Forms avec tableaux - pleine largeur */
+.form-full-width,
+form.form-full-width {
+    max-width: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 .form-group, .mb-3 {
@@ -961,7 +973,7 @@ body.login-page {
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
-    margin-top: 2.5rem;
+    margin-top: auto;
     padding-top: 1.5rem;
     border-top: 1px solid #e2e8f0;
 }
@@ -1330,4 +1342,63 @@ a.card:hover h3 {
 .role-badge-visiteur {
     background-color: var(--text-light);
     color: white;
+}
+
+/* =========================================
+   Classes pour remplacer les styles inline
+   ========================================= */
+
+/* Contact page */
+.row-align-start {
+    align-items: flex-start;
+}
+
+.hidden-placeholder {
+    visibility: hidden;
+    margin-bottom: 1rem;
+}
+
+/* Tags checkboxes (articles form) */
+.tags-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: #f1f5f9;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Progress bar (reports) */
+.progress {
+    height: 25px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.progress-bar.bg-primary {
+    background: var(--primary-color);
+}
+
+/* Permissions page */
+.mt-1-5 {
+    margin-top: 1.5rem;
+}
+
+/* Header dropdown */
+.nav-link-violet {
+    color: #a78bfa !important;
 }

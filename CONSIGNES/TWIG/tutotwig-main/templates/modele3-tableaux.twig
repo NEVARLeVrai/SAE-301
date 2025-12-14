@@ -1,0 +1,25 @@
+{% extends "modele2-deux-blocs.twig" %}
+
+{% block rouge %}
+<div class="block-petit-fils">
+	<p>Les petit-fils sont entourés en bleu</p>
+	<h2>Affichage d'un tableau sous forme de liste à puces</h2>
+	<ul>
+		{% for element in tableau_rouge %}
+		<li>{{ element }}</li>
+		{% endfor %}
+	</ul>
+</div>
+{% endblock rouge %}
+
+{% block bleu %}
+<div class="block-petit-fils">
+	<p>Les petit-fils sont entourés en bleu</p>
+	<h2>Affichage d'un tableau sous forme de liste de mots</h2>
+	<p>
+		{% for element in tableau_bleu %}
+		{{ element }}
+		{% endfor %}
+	</p>
+</div>
+{% endblock bleu %}

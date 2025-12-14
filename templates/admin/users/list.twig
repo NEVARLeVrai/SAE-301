@@ -1,0 +1,66 @@
+{#
+    ===========================================
+    ADMIN - GESTION DES UTILISATEURS (US-26)
+    ===========================================
+    CRUD utilisateurs avec gestion des rôles.
+    Variables : users, admin_role
+#}
+{% extends "base.twig" %}
+
+{% block title %} - Utilisateurs{% endblock %}
+
+{% block content %}
+<h1>Gestion des Utilisateurs</h1>
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom d'utilisateur</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Date d'inscription</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if users is defined and users|length > 0 %}
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% set roleColor = 'secondary' %}
+                            {% if user.role == 'admin' %}
+                                {% set roleColor = 'danger' %}
+                            {% elseif user.role == 'redacteur' %}
+                                {% set roleColor = 'warning' %}
+                            {% elseif user.role == 'musicien' %}
+                                {% set roleColor = 'info' %}
+                            {% elseif user.role == 'auteur' %}
+                                {% set roleColor = 'success' %}
+                            {% endif %}
+                            <span class="badge badge-{{ roleColor }}">
+                                {{ user.role|capitalize }}
+                            </span>
+                        </td>
+                        <td>{{ user.created_at|date('d/m/Y H:i') }}</td>
+                        <td class="text-center">
+                            <a href="index.php?action=edit_user&id={{ user.id }}" class="btn-small">Modifier</a>
+                            {% if user.id != admin_id %}
+                                <a href="index.php?action=delete_user&id={{ user.id }}" class="btn-small btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">Supprimer</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

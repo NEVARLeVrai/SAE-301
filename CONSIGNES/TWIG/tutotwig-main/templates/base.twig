@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<!--
+	Ce fichier HTML sert de base à tous les modèles en héritant.
+	Il contient les éléments qui seront présents sur toutes les pages du site.
+	En particulier les entêtes HTML, les header et footer et éventuellement le menu principal
+-->
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ titre }}</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+	<header>
+		<p>Entête de page - commun aux page qui étendent base.twig</p>
+		<nav>
+			<!-- Menu présent dans toutes les pages héritant (extends) de ce modèle -->
+			<a href="page2-accueil.php">Accueil</a> -
+			<a href="page3-livre1.php">Hypérion</a> -
+			<a href="page4-livre2.php">Les Misérables</a> -
+			<a href="page5-droite-gauche.php">Droite/Gauche</a> -
+			<a href="page6-tableaux.php">Tableaux</a> -
+			<a href="page7-editeurs.php">Editeurs</a> -
+			<a href="page1-independante.php">Indépendante</a> -
+			<a href="page0-php-sans-twig.php">Sans TWIG</a>
+		</nav>
+	</header>
+	<main>
+		{# Ceci est un commentaire en TWIG #}
+		{# La ligne ci-dessous définit un bloc TWIG avec un contenu par défault.
+		On peut spécialiser dans les modèles fils en remplaçant le contenu par un autre #}
+		{% block main %}
+		<div class="block-pere">
+			<p>Les blocks "pères" ont un fond orangé et sont entourés de pointillés rouges</p>
+			<h1>Modèle de page basique avec un bloc main</h1>
+			<p>{{ message }}</p>
+			<p>Un autre paragraphe du bloc main</p>
+		</div>
+		{% endblock %}
+	</main>
+	<footer>
+		{% block footer %}
+		<div class="block-pere">
+			<p>Pied de page</p>
+		</div>
+		{% endblock footer %}
+	</footer>
+</body>
+
+</html>

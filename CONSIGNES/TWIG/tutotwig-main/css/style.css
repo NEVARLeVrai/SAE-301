@@ -1,0 +1,56 @@
+body {
+	font-size: 1.1em;
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #eeeeee;
+}
+
+main,
+header,
+footer {
+	background-color: white;
+	padding: 20px;
+	max-width: 1000px;
+	margin: 10px auto;
+}
+
+div.livre {
+	background-color: lightgreen;
+	padding: 10px 20px;
+	max-width: 600px;
+}
+
+div.deux-colonnes {
+	display: flex;
+	flex-flow: row;
+}
+
+div.bleu {
+	min-width: 400px;
+	background-color: lightblue;
+	padding: 10px;
+	margin: 10px;
+}
+
+div.rouge {
+	min-width: 400px;
+	background-color: lightcoral;
+	padding: 10px;
+	margin: 10px;
+}
+
+.block-pere {
+	background-color: bisque;
+	border: 2px dashed lightcoral;
+	padding: 20px;
+}
+
+.block-fils {
+	background-color: lightgreen;
+	border: 2px dashed green;
+	padding: 20px;
+}
+
+.block-petit-fils {
+	border: 2px solid blue;
+	padding: 20px;
+}

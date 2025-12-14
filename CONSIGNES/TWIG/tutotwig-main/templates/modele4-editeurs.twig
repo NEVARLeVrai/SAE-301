@@ -1,0 +1,32 @@
+{% extends "modele2-deux-blocs.twig" %}
+
+{% block rouge %}
+<div class="block-petit-fils">
+	<h2>Le bloc rouge</h2>
+	{# La fonction dump(variable) permet de voir ce qu'il y a dans une variable TWIG avant de l'utiliser #}
+	<p>Le tableau d'éditeurs : {{ dump(editeurs) }}</p>
+	<p>Le premier éditeur : {{ dump(editeurs[0]) }}</p>
+</div>
+{% endblock rouge %}
+
+{% block bleu %}
+<div class="block-petit-fils">
+	<h2>Un tableau de tableaux : une liste d'éditeurs</h2>
+	<ul>
+		{% for editeur in editeurs %}
+		<li>
+			<a href="#">{{ editeur.nom }}</a>
+			<br>
+			<i>{{ editeur.adresse }}</i>
+		</li>
+		{% endfor %}
+
+	</ul>
+</div>
+{% endblock bleu %}
+
+{% block footer %}
+<div class="block-fils">
+	<p>Pied de page version 2</p>
+</div>
+{% endblock footer %}

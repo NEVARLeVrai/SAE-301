@@ -1,0 +1,6 @@
+{
+    "name": "cazier/tuto-twig",
+    "require": {
+        "twig/twig": "^3.7"
+    }
+}

@@ -1,0 +1,81 @@
+{% extends "base.twig" %}
+
+{% block title %} - {{ article is defined ? 'Modifier l\'article' : 'Nouvel Article' }}{% endblock %}
+
+{% block content %}
+<h1>{{ article is defined ? 'Modifier l\'article' : 'Nouvel Article' }}</h1>
+
+<form action="index.php?action={{ article is defined ? 'edit_article' : 'create_article' }}" method="POST" enctype="multipart/form-data">
+    {% if article is defined %}
+        <input type="hidden" name="id" value="{{ article.id }}">
+        <input type="hidden" name="current_image" value="{{ article.image_url }}">
+    {% endif %}
+
+    <div class="form-group">
+        <label for="title">Titre de l'article</label>
+        <input type="text" id="title" name="title" required value="{{ article.title|default('') }}">
+    </div>
+
+    <div class="form-group">
+        <label for="category">Catégorie</label>
+        <select id="category" name="category" required>
+            <option value="Actualité" {{ article.category|default('') == 'Actualité' ? 'selected' : '' }}>Actualité</option>
+            <option value="Technique" {{ article.category|default('') == 'Technique' ? 'selected' : '' }}>Technique</option>
+            <option value="Interviews" {{ article.category|default('') == 'Interviews' ? 'selected' : '' }}>Interviews</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="image">Image à la une (US-23)</label>
+        {% if article is defined and article.image_url %}
+            <div class="mb-2">
+                <img src="../../assets/{{ article.image_url }}" alt="Aperçu" class="admin-preview-img">
+            </div>
+        {% endif %}
+        <input type="file" id="image" name="image" accept="image/*">
+        <small>Formats acceptés : JPG, PNG. Max 5Mo.</small>
+    </div>
+
+    <div class="form-group">
+        <label for="content">Contenu</label>
+        <textarea id="content" name="content" required class="admin-textarea-large">{{ article.content|default('') }}</textarea>
+    </div>
+
+    <!-- US-25 : Système de brouillon -->
+    <div class="form-group">
+        <label for="status">Statut de l'article</label>
+        <select id="status" name="status" required>
+            <option value="published" {{ (article is not defined or article.status|default('published') == 'published') ? 'selected' : '' }}>Publié</option>
+            <option value="draft" {{ (article is defined and article.status|default('') == 'draft') ? 'selected' : '' }}>Brouillon</option>
+        </select>
+    </div>
+
+    <!-- US-22 : Planification de publication -->
+    <div class="form-group">
+        <label for="published_at">Date de publication (Laisser vide pour publication immédiate)</label>
+        <input type="datetime-local" id="published_at" name="published_at" value="{{ (article is defined and article.published_at) ? article.published_at|date('Y-m-d\\TH:i') : '' }}">
+    </div>
+
+    <!-- US-28 : Tags -->
+    {% if allTags is defined and allTags|length > 0 %}
+    <div class="form-group">
+        <label>Tags (US-28)</label>
+        <div class="tags-checkboxes">
+            {% for tag in allTags %}
+                <label class="tag-checkbox-label">
+                    <input type="checkbox" name="tags[]" value="{{ tag.id }}" 
+                        {{ (articleTagIds is defined and tag.id in articleTagIds) ? 'checked' : '' }}>
+                    {{ tag.name }}
+                </label>
+            {% endfor %}
+        </div>
+        <small>Sélectionnez les tags à associer à cet article.</small>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn">{{ article is defined ? 'Mettre à jour' : 'Publier' }}</button>
+        <a href="index.php?action=articles" class="btn btn-outline">Annuler</a>
+    </div>
+</form>
+{% endblock %}

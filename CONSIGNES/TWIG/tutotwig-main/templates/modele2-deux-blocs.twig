@@ -1,0 +1,20 @@
+{% extends "base.twig" %}
+
+{# Ce modèle TWIG n'a pas de contenu, il crée deux blocs (rouge et bleu) vides dans le bloc main.
+Ces deux blocs sont spécialisés dans les modèles fils #}
+{% block main %}
+<div class="deux-colonnes block-fils">
+	<div class="bleu">
+		{% block bleu %}
+		<h1>Un modèle de page créant deux sous-blocs</h1>
+		<h2>Bleu à gauche</h2>
+		{% endblock bleu %}
+	</div>
+	<div class="rouge">
+		{% block rouge %}
+		<h1>Deux sous-blocs = deux petit-fils</h1>
+		<h2>Rouge à droite</h2>
+		{% endblock rouge %}
+	</div>
+</div>
+{% endblock main %}

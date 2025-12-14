@@ -1,0 +1,129 @@
+{#
+    ===========================================
+    PAIEMENT / CHECKOUT (US-03, US-20)
+    ===========================================
+    Formulaire de paiement et validation commande.
+    Variables : panier_details, total, user_logged_in
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Paiement{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-credit-card"></i> Finaliser la commande</h1>
+
+{# Indicateur d'étape (US-03) #}
+<div class="checkout-steps mb-4">
+    <div class="step completed"><span>1</span> Panier</div>
+    <div class="step active"><span>2</span> Paiement</div>
+    <div class="step"><span>3</span> Confirmation</div>
+</div>
+
+{% if error is defined and error %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card p-4 mb-3">
+            <h3>Récapitulatif de la commande</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Qté</th>
+                        <th>Prix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in panier_details %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ item.subtotal|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="text-end"><strong>Total :</strong></td>
+                        <td><strong>{{ total|number_format(2, ',', ' ') }} €</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card p-4">
+            <h3>Paiement</h3>
+            <form action="index.php?action=checkout" method="POST">
+                <div class="form-group mb-3">
+                    <label><i class="bi bi-credit-card"></i> Numéro de carte</label>
+                    <input type="text" class="form-control" placeholder="•••• •••• •••• ••••" disabled>
+                    <small class="text-muted">(Simulation - pas de vrai paiement)</small>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label>Expiration</label>
+                        <input type="text" class="form-control" placeholder="MM/AA" disabled>
+                    </div>
+                    <div class="col-6">
+                        <label>CVV</label>
+                        <input type="text" class="form-control" placeholder="•••" disabled>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info small">
+                    <i class="bi bi-shield-check me-1"></i> Paiement sécurisé (simulation)
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-check-circle"></i> Confirmer et payer {{ total|number_format(2, ',', ' ') }} €
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+    }
+    .checkout-steps .step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+    }
+    .checkout-steps .step span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e9ecef;
+        font-weight: bold;
+    }
+    .checkout-steps .step.active {
+        color: #4c1d95;
+        font-weight: bold;
+    }
+    .checkout-steps .step.active span {
+        background: #4c1d95;
+        color: white;
+    }
+    .checkout-steps .step.completed span {
+        background: #198754;
+        color: white;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base.twig' %}
+
+{% block title %} - {{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="article-detail-container">
+    <a href="index.php?action=blog" class="btn btn-secondary mb-2">&larr; Retour au blog</a>
+    
+    <article class="card">
+        {% if article.image_url %}
+            <img src="../../assets/{{ article.image_url }}" alt="{{ article.title }}" class="article-detail-img">
+        {% endif %}
+        
+        <div class="article-body">
+            <h1>{{ article.title }}</h1>
+            <p class="card-meta">
+                Publié le {{ article.created_at|date('d/m/Y') }} 
+                par <strong>{{ article.author }}</strong> 
+                dans <em>{{ article.category }}</em>
+            </p>
+            
+            <div class="article-content article-text mt-2">
+                {{ article.content|nl2br }}
+            </div>
+
+            <div class="article-actions mt-3">
+                {# US-16 Favoris #}
+                {% if user_logged_in %}
+                    {% if is_favorite %}
+                        <a href="index.php?action=remove_favorite&item_id={{ article.id }}&item_type=article&from=detail" class="btn btn-danger">
+                            ❤️ Retirer des favoris
+                        </a>
+                    {% else %}
+                        <a href="index.php?action=add_favorite&item_id={{ article.id }}&item_type=article" class="btn btn-secondary">
+                            🤍 Ajouter aux favoris
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="index.php?action=login" class="btn btn-secondary">🤍 Ajouter aux favoris</a>
+                {% endif %}
+            </div>
+
+            <div class="share-buttons mt-2">
+                <h3>Partager cet article</h3>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ current_url|url_encode }}" target="_blank" class="btn btn-small btn-facebook">Facebook</a>
+                <a href="https://twitter.com/intent/tweet?url={{ current_url|url_encode }}&text={{ article.title|url_encode }}" target="_blank" class="btn btn-small btn-twitter">Twitter</a>
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ current_url|url_encode }}&title={{ article.title|url_encode }}" target="_blank" class="btn btn-small btn-linkedin">LinkedIn</a>
+            </div>
+        </div>
+    </article>
+
+    {# US-35 : Commentaires #}
+    <section class="comments-section mt-4">
+        <h2>Commentaires</h2>
+        
+        {% if comment_message %}
+            <div class="alert alert-{{ comment_message.type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
+                <i class="bi bi-{{ comment_message.type == 'success' ? 'check-circle' : 'exclamation-triangle' }} me-2"></i>{{ comment_message.text }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+        
+        {% if user_logged_in %}
+            <form action="index.php?action=add_comment" method="POST" class="comment-form mb-3">
+                <input type="hidden" name="article_id" value="{{ article.id }}">
+                <div class="form-group">
+                    <label for="comment">Votre commentaire</label>
+                    <textarea id="comment" name="content" required class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <small class="text-muted d-block mt-1">Votre commentaire sera visible après modération.</small>
+            </form>
+            
+            {% if userComments is defined and userComments|length > 0 %}
+                <div class="my-comments-status mb-3">
+                    <h5>État de vos commentaires :</h5>
+                    {% for userComment in userComments %}
+                        <div class="alert alert-{{ userComment.status == 'approved' ? 'success' : (userComment.status == 'rejected' ? 'danger' : 'warning') }} mb-2" role="alert">
+                            <i class="bi bi-{{ userComment.status == 'approved' ? 'check-circle' : (userComment.status == 'rejected' ? 'x-circle' : 'clock') }} me-2"></i>
+                            <strong>
+                                {{ userComment.status == 'approved' ? 'Approuvé' : (userComment.status == 'rejected' ? 'Refusé' : 'En attente') }}
+                            </strong>
+                            <small class="d-block text-muted mt-1">
+                                {{ userComment.content|nl2br }}
+                            </small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p><a href="index.php?action=login">Connectez-vous</a> pour laisser un commentaire.</p>
+        {% endif %}
+
+        <div class="comments-list">
+            {% if commentaires is defined and commentaires|length > 0 %}
+                {% for comment in commentaires %}
+                    <div class="comment-card card mb-2">
+                        <div class="comment-header">
+                            <strong>{{ comment.username }}</strong>
+                            <small class="text-muted">le {{ comment.created_at|date('d/m/Y à H:i') }}</small>
+                        </div>
+                        <div class="comment-body">
+                            {{ comment.content|nl2br }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucun commentaire pour le moment. Soyez le premier !</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

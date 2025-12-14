@@ -1,0 +1,85 @@
+{% extends "base.twig" %}
+
+{% block title %} - {{ produit is defined ? 'Modifier' : 'Créer' }} un Produit{% endblock %}
+
+{% block content %}
+<h1>{{ produit is defined ? 'Modifier' : 'Créer' }} un Produit</h1>
+
+{% if error is defined and error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form action="index.php?action={{ produit is defined ? 'edit_produit' : 'create_produit' }}" method="post" enctype="multipart/form-data" class="admin-form">
+    {% if produit is defined %}
+        <input type="hidden" name="id" value="{{ produit.id }}">
+        <input type="hidden" name="current_image" value="{{ produit.image_url }}">
+        <input type="hidden" name="current_file" value="{{ produit.file_url }}">
+    {% endif %}
+
+    <div class="form-group">
+        <label for="name">Nom du produit</label>
+        <input type="text" id="name" name="name" value="{{ produit.name|default('') }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="5">{{ produit.description|default('') }}</textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="price">Prix (€)</label>
+            <input type="number" step="0.01" id="price" name="price" value="{{ produit.price|default('') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="stock">Stock</label>
+            <input type="number" id="stock" name="stock" value="{{ produit.stock|default('0') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Catégorie</label>
+            <input type="text" id="category" name="category" value="{{ produit.category|default('') }}" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="type">Type</label>
+        <select id="type" name="type" required>
+            <option value="partition_physique" {{ (produit is defined and produit.type == 'partition_physique') ? 'selected' : '' }}>Partition Physique</option>
+            <option value="partition_virtuelle" {{ (produit is defined and produit.type == 'partition_virtuelle') ? 'selected' : '' }}>Partition Virtuelle (PDF)</option>
+            <option value="instrument" {{ (produit is defined and produit.type == 'instrument') ? 'selected' : '' }}>Instrument</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="image">Image</label>
+        {% if produit is defined and produit.image_url %}
+            <div class="mb-2">
+                <img src="../../assets/{{ produit.image_url }}" alt="Image actuelle" class="admin-preview-img">
+            </div>
+        {% endif %}
+        <input type="file" id="image" name="image">
+    </div>
+
+    <div class="form-group">
+        <label for="file">Fichier (PDF/MP3) - Optionnel</label>
+        {% if produit is defined and produit.file_url %}
+            <p class="text-muted">Fichier actuel : {{ produit.file_url }}</p>
+        {% endif %}
+        <input type="file" id="file" name="file">
+    </div>
+
+    <div class="form-group">
+        <label for="status">Statut</label>
+        <select id="status" name="status">
+            <option value="approved" {{ (produit is defined and produit.status == 'approved') ? 'selected' : '' }}>Approuvé</option>
+            <option value="pending" {{ (produit is defined and produit.status == 'pending') ? 'selected' : '' }}>En attente</option>
+            <option value="rejected" {{ (produit is defined and produit.status == 'rejected') ? 'selected' : '' }}>Rejeté</option>
+        </select>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn">{{ produit is defined ? 'Mettre à jour' : 'Créer' }}</button>
+        <a href="index.php?action=produits" class="btn btn-outline">Annuler</a>
+    </div>
+</form>
+{% endblock %}

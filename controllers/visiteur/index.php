@@ -16,9 +16,16 @@
  * Respect des consignes :
  * - Encapsulation : données POST traitées dans les classes
  * - Séparation MVC : contrôleur gère le routage, modèles gèrent les données
+ * - Templates Twig pour l'affichage des vues
  */
 
 session_start();
+
+// ===========================================
+// INITIALISATION TWIG
+// ===========================================
+include_once '../../include/twig.php';
+$twig = init_twig();
 
 // Récupération de l'action (routage par paramètre GET)
 $action = isset($_GET['action']) ? $_GET['action'] : 'accueil';
@@ -205,12 +212,7 @@ if ($action === 'request_role' && isset($_SESSION['user_role']) && $_SESSION['us
 }
 
 // ===========================================
-// INCLUSION DU HEADER (après les redirections)
-// ===========================================
-include '../../vues/global/header.php';
-
-// ===========================================
-// ROUTAGE PRINCIPAL - Affichage des vues visiteur
+// ROUTAGE PRINCIPAL - Rendu avec Twig
 // ===========================================
 switch ($action) {
     // US-11 : Page d'accueil avec dernières nouveautés
@@ -224,7 +226,10 @@ switch ($action) {
         // Récupération des derniers cours
         $derniers_cours = $coursModel->getLatestCourses(3);
 
-        include '../../vues/visiteur/accueil.php';
+        echo render_template($twig, 'visiteur/accueil.twig', [
+            'derniers_articles' => $derniers_articles,
+            'derniers_cours' => $derniers_cours
+        ]);
         break;
     
     // US-01, US-12 : Liste des cours avec filtres (niveau, instrument, catégorie)
@@ -244,7 +249,16 @@ switch ($action) {
 
         $liste_cours = $cours->getCourses($filters);
         
-        include '../../vues/visiteur/cours/list.php';
+        echo render_template($twig, 'visiteur/cours/list.twig', [
+            'liste_cours' => $liste_cours,
+            'levels' => $levels,
+            'instruments' => $instruments,
+            'categories' => $categories,
+            'current_level' => $_GET['level'] ?? '',
+            'current_instrument' => $_GET['instrument'] ?? '',
+            'current_category' => $_GET['category'] ?? '',
+            'breadcrumbs' => ['Cours' => 'index.php?action=cours']
+        ]);
         break;
 
     // US-15, US-31 : Fiche détaillée d'un cours
@@ -253,12 +267,26 @@ switch ($action) {
             $coursModel = new Cours($db);
             $cours_detail = $coursModel->getCourseById($_GET['id']);
             if ($cours_detail) {
-                include '../../vues/visiteur/cours/details.php';
+                $twigVars = [
+                    'cours' => $cours_detail,
+                    'breadcrumbs' => [
+                        'Cours' => 'index.php?action=cours',
+                        'Détail' => ''
+                    ]
+                ];
+                
+                // Vérifier favori si connecté
+                if (isset($_SESSION['user_logged_in'])) {
+                    $favoriModel = new Favori($db);
+                    $twigVars['is_favorite'] = $favoriModel->isFavorite($_SESSION['user_id'], $_GET['id'], 'course');
+                }
+                
+                echo render_template($twig, 'visiteur/cours/details.twig', $twigVars);
             } else {
-                echo "<div class='container'><p>Cours introuvable.</p></div>";
+                echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Cours introuvable.']);
             }
         } else {
-            echo "<div class='container'><p>Identifiant manquant.</p></div>";
+            echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Identifiant manquant.']);
         }
         break;
     
@@ -267,15 +295,22 @@ switch ($action) {
         $articleModel = new Article($db);
         $categories = $articleModel->getCategories();
         
+        $twigVars = [
+            'categories' => $categories,
+            'breadcrumbs' => ['Blog' => 'index.php?action=blog']
+        ];
+        
         if (isset($_GET['search']) && !empty($_GET['search'])) {
-            $liste_articles = $articleModel->searchArticles($_GET['search']);
+            $twigVars['liste_articles'] = $articleModel->searchArticles($_GET['search']);
+            $twigVars['current_search'] = $_GET['search'];
         } elseif (isset($_GET['category']) && !empty($_GET['category'])) {
-            $liste_articles = $articleModel->getArticles($_GET['category']);
+            $twigVars['liste_articles'] = $articleModel->getArticles($_GET['category']);
+            $twigVars['current_category'] = $_GET['category'];
         } else {
-            $liste_articles = $articleModel->getArticles();
+            $twigVars['liste_articles'] = $articleModel->getArticles();
         }
         
-        include '../../vues/visiteur/articles/list.php';
+        echo render_template($twig, 'visiteur/articles/list.twig', $twigVars);
         break;
 
     // US-02 : Fiche détaillée d'un article avec commentaires
@@ -295,12 +330,35 @@ switch ($action) {
             }
 
             if ($article) {
-                include '../../vues/visiteur/articles/details.php';
+                $twigVars = [
+                    'article' => $article,
+                    'commentaires' => $commentaires,
+                    'userComments' => $userComments,
+                    'current_url' => "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+                    'breadcrumbs' => [
+                        'Blog' => 'index.php?action=blog',
+                        'Article' => ''
+                    ]
+                ];
+                
+                // Vérifier favori si connecté
+                if (isset($_SESSION['user_logged_in'])) {
+                    $favoriModel = new Favori($db);
+                    $twigVars['is_favorite'] = $favoriModel->isFavorite($_SESSION['user_id'], $_GET['id'], 'article');
+                }
+                
+                // Message de commentaire (flash message)
+                if (isset($_SESSION['comment_message'])) {
+                    $twigVars['comment_message'] = $_SESSION['comment_message'];
+                    unset($_SESSION['comment_message']);
+                }
+                
+                echo render_template($twig, 'visiteur/articles/details.twig', $twigVars);
             } else {
-                echo "<div class='container'><p>Article introuvable.</p></div>";
+                echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Article introuvable.']);
             }
         } else {
-            echo "<div class='container'><p>Identifiant manquant.</p></div>";
+            echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Identifiant manquant.']);
         }
         break;
 
@@ -309,7 +367,10 @@ switch ($action) {
         $produitModel = new Produit($db);
         // Affiche uniquement les produits approuvés (pas pending/rejected)
         $liste_produits = $produitModel->getApprovedProducts();
-        include '../../vues/visiteur/produits/list.php';
+        echo render_template($twig, 'visiteur/produits/list.twig', [
+            'liste_produits' => $liste_produits,
+            'breadcrumbs' => ['Boutique' => 'index.php?action=boutique']
+        ]);
         break;
 
     // US-03, US-21 : Fiche produit avec avis et notes
@@ -330,17 +391,28 @@ switch ($action) {
                     $user_has_bought = $orderModel->hasUserBoughtProduct($_SESSION['user_id'], $_GET['id']);
                 }
                 
-                include '../../vues/visiteur/produits/details.php';
+                echo render_template($twig, 'visiteur/produits/details.twig', [
+                    'produit' => $produit,
+                    'avis' => $avis,
+                    'moyenne_note' => $moyenne_note,
+                    'user_has_bought' => $user_has_bought,
+                    'breadcrumbs' => [
+                        'Boutique' => 'index.php?action=boutique',
+                        'Produit' => ''
+                    ]
+                ]);
             } else {
-                echo "<div class='container'><p>Produit introuvable.</p></div>";
+                echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Produit introuvable.']);
             }
         } else {
-            echo "<div class='container'><p>Identifiant manquant.</p></div>";
+            echo render_template($twig, 'visiteur/accueil.twig', ['error' => 'Identifiant manquant.']);
         }
         break;
 
     case 'contact':
-        include '../../vues/visiteur/contact.php';
+        echo render_template($twig, 'visiteur/contact.twig', [
+            'breadcrumbs' => ['Contact' => 'index.php?action=contact']
+        ]);
         break;
 
     case 'panier':
@@ -359,10 +431,18 @@ switch ($action) {
                 }
             }
         }
-        include '../../vues/visiteur/orders/panier.php';
+        echo render_template($twig, 'visiteur/orders/panier.twig', [
+            'panier_details' => $panier_details,
+            'total' => $total,
+            'breadcrumbs' => [
+                'Boutique' => 'index.php?action=boutique',
+                'Panier' => ''
+            ]
+        ]);
         break;
 
     case 'login':
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation avec la classe Validator
             $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -404,10 +484,14 @@ switch ($action) {
                 }
             }
         }
-        include '../../vues/visiteur/auth/login.php';
+        echo render_template($twig, 'visiteur/auth/login.twig', [
+            'error' => $error,
+            'breadcrumbs' => ['Connexion' => 'index.php?action=login']
+        ]);
         break;
 
     case 'register':
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation avec la classe Validator
             $username = isset($_POST['username']) ? trim($_POST['username']) : '';
@@ -449,12 +533,16 @@ switch ($action) {
                 }
             }
         }
-        include '../../vues/visiteur/auth/register.php';
+        echo render_template($twig, 'visiteur/auth/register.twig', [
+            'error' => $error,
+            'breadcrumbs' => ['Inscription' => 'index.php?action=register']
+        ]);
         break;
 
     // US-03, US-20 : Validation de commande et envoi email de confirmation
     case 'checkout':
         // Vérifications connexion et panier faites avant le header
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // US-03 : Création de la commande avec décrémentation du stock
             $produitModel = new Produit($db);
@@ -488,30 +576,57 @@ switch ($action) {
                     $body .= "Montant total : " . number_format($total, 2) . " €\n\n";
                     $body .= "Détail de la commande :\n";
                     foreach ($items as $item) {
-                        // On pourrait récupérer le nom du produit ici pour être plus précis
                         $body .= "- Produit ID " . $item['product_id'] . " x " . $item['quantity'] . " (" . $item['price'] . " €)\n";
                     }
                     $body .= "\nMerci de votre confiance.\nL'équipe OmniMusique";
                     $headers = "From: no-reply@omnimusique.fr" . "\r\n" .
                                "X-Mailer: PHP/" . phpversion();
 
-                    mail($to, $subject, $body, $headers);
+                    @mail($to, $subject, $body, $headers);
                 }
 
                 unset($_SESSION['panier']);
-                $success = "Commande validée avec succès ! Un email de confirmation vous a été envoyé.";
-                include '../../vues/visiteur/orders/confirmation.php'; // À créer ou utiliser une vue générique
+                echo render_template($twig, 'visiteur/orders/confirmation.twig', [
+                    'success' => "Commande validée avec succès ! Un email de confirmation vous a été envoyé."
+                ]);
                 exit;
             } else {
                 $error = "Erreur lors de la commande.";
             }
         }
-        include '../../vues/visiteur/orders/checkout.php';
+        
+        // Récapitulatif du panier pour checkout
+        $panier_details = [];
+        $total = 0;
+        if (isset($_SESSION['panier']) && !empty($_SESSION['panier'])) {
+            $produitModel = new Produit($db);
+            foreach ($_SESSION['panier'] as $id => $qty) {
+                $prod = $produitModel->getProductById($id);
+                if ($prod) {
+                    $prod['qty'] = $qty;
+                    $prod['subtotal'] = $prod['price'] * $qty;
+                    $total += $prod['subtotal'];
+                    $panier_details[] = $prod;
+                }
+            }
+        }
+        
+        echo render_template($twig, 'visiteur/orders/checkout.twig', [
+            'panier_details' => $panier_details,
+            'total' => $total,
+            'error' => $error,
+            'breadcrumbs' => [
+                'Panier' => 'index.php?action=panier',
+                'Paiement' => ''
+            ]
+        ]);
         break;
 
     // US-04 : Vente d'instrument d'occasion par un visiteur
     // Le produit passe en status 'pending' pour modération (US-10)
     case 'sell_instrument':
+        $success = null;
+        $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // US-23 : Upload d'image avec validation type/taille
             $image_url = FileUpload::uploadImage('image', FileUpload::UPLOAD_DIR_ASSETS);
@@ -536,7 +651,14 @@ switch ($action) {
                 $error = "Erreur lors de la soumission.";
             }
         }
-        include '../../vues/visiteur/produits/sell.php';
+        echo render_template($twig, 'visiteur/produits/sell.twig', [
+            'success' => $success,
+            'error' => $error,
+            'breadcrumbs' => [
+                'Boutique' => 'index.php?action=boutique',
+                'Vendre' => ''
+            ]
+        ]);
         break;
 
     // --- MES COMMANDES (US-19) ---
@@ -544,7 +666,10 @@ switch ($action) {
         // Vérification connexion faite avant le header
         $orderModel = new Order($db);
         $orders = $orderModel->getOrdersByUser($_SESSION['user_id']);
-        include '../../vues/visiteur/orders/list.php';
+        echo render_template($twig, 'visiteur/orders/list.twig', [
+            'orders' => $orders,
+            'breadcrumbs' => ['Mes commandes' => 'index.php?action=my_orders']
+        ]);
         break;
 
     // US-32 : Téléchargement sécurisé de produit numérique
@@ -561,8 +686,8 @@ switch ($action) {
                 $product = $produitModel->getProductById($product_id);
                 
                 if ($product && !empty($product['file_url'])) {
-                    // Note: Idéalement, les fichiers devraient être dans un dossier protégé (ex: hors racine web ou .htaccess deny all)
-                    $file_path = "../../img/" . $product['file_url']; 
+                    // Note: Idéalement, les fichiers devraient être dans un dossier protégé
+                    $file_path = "../../assets/" . $product['file_url']; 
                     
                     if (file_exists($file_path)) {
                         // Forcer le téléchargement
@@ -596,13 +721,18 @@ switch ($action) {
         
         $type = isset($_GET['type']) ? $_GET['type'] : 'course';
         
+        $twigVars = [
+            'current_type' => $type,
+            'breadcrumbs' => ['Mes favoris' => 'index.php?action=my_favorites']
+        ];
+        
         if ($type === 'article') {
-            $favorite_articles = $favoriModel->getFavoriteArticlesWithDetails($_SESSION['user_id']);
+            $twigVars['favorite_articles'] = $favoriModel->getFavoriteArticlesWithDetails($_SESSION['user_id']);
         } else {
-            $favorite_courses = $favoriModel->getFavoriteCoursesWithDetails($_SESSION['user_id']);
+            $twigVars['favorite_courses'] = $favoriModel->getFavoriteCoursesWithDetails($_SESSION['user_id']);
         }
         
-        include '../../vues/visiteur/favorites/list.php';
+        echo render_template($twig, 'visiteur/favorites/list.twig', $twigVars);
         break;
 
     // ==========================================
@@ -611,6 +741,8 @@ switch ($action) {
     case 'request_role':
         // Vérifications connexion et rôle faites avant le header
         $roleRequestModel = new RoleRequest($db);
+        $success = null;
+        $error = null;
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Récupérer le rôle demandé depuis POST pour la notification
@@ -634,14 +766,23 @@ switch ($action) {
         $hasPending = $roleRequestModel->hasPendingRequest($_SESSION['user_id']);
         $myRequests = $roleRequestModel->getRequestsByUser($_SESSION['user_id']);
         
-        include '../../vues/visiteur/auth/request_role.php';
+        echo render_template($twig, 'visiteur/auth/request_role.twig', [
+            'hasPending' => $hasPending,
+            'myRequests' => $myRequests,
+            'success' => $success,
+            'error' => $error,
+            'breadcrumbs' => ['Devenir contributeur' => 'index.php?action=request_role']
+        ]);
         break;
 
     // --- MENTIONS LÉGALES ---
     case 'mentions_legales':
-        include '../../vues/visiteur/mentions_legales.php';
+        echo render_template($twig, 'visiteur/mentions_legales.twig', [
+            'breadcrumbs' => ['Mentions légales' => 'index.php?action=mentions_legales']
+        ]);
         break;
 
-    }
-
-include '../../vues/global/footer.php';
+    default:
+        echo render_template($twig, 'visiteur/accueil.twig', []);
+        break;
+}

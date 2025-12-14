@@ -1,0 +1,51 @@
+{#
+    ===========================================
+    ADMIN - GESTION DES COMMANDES (US-08, US-19)
+    ===========================================
+    Liste des commandes avec statut et détails.
+    Variables : orders, admin_role
+#}
+{% extends "base.twig" %}
+
+{% block title %} - Commandes{% endblock %}
+
+{% block content %}
+<h1>Liste des Commandes</h1>
+
+<p>Consultez l'historique des commandes passées sur le site.</p>
+
+{% if orders is defined and orders|length > 0 %}
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Montant Total</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.created_at|date('d/m/Y H:i') }}</td>
+                    <td>{{ order.username }}</td>
+                    <td>{{ order.total_amount|number_format(2, ',', ' ') }} €</td>
+                    <td>
+                        <span class="badge badge-{{ order.status == 'paid' ? 'success' : 'warning' }}">
+                            {{ order.status == 'paid' ? 'Payée' : order.status|capitalize }}
+                        </span>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <p>Aucune commande pour le moment.</p>
+</div>
+{% endif %}
+{% endblock %}

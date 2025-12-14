@@ -1,0 +1,57 @@
+{#
+    ===========================================
+    ADMIN - NOTIFICATIONS (US-29)
+    ===========================================
+    Centre de notifications pour nouvelles annonces.
+    Variables : notifications, admin_role
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Notifications{% endblock %}
+
+{% block content %}
+<h1>Centre de Notifications</h1>
+
+<p>Consultez les notifications et alertes du système.</p>
+
+{% if notifications is defined and notifications|length > 0 %}
+    <div class="notifications-actions mb-3">
+        <a href="index.php?action=mark_all_notifications_read" class="btn btn-outline">
+            ✓ Tout marquer comme lu
+        </a>
+    </div>
+
+    <div class="notifications-list">
+        {% for notif in notifications %}
+            <div class="notification-card admin-card mb-2 {{ notif.is_read ? 'read' : 'unread' }}">
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        {{ notif.is_read ? '📭' : '📬' }}
+                    </div>
+                    <div class="notification-body">
+                        <p class="notification-message">
+                            {{ notif.message }}
+                        </p>
+                        <small class="notification-date text-muted">
+                            {{ notif.created_at|date('d/m/Y à H:i') }}
+                        </small>
+                    </div>
+                    <div class="notification-actions">
+                        {% if notif.link %}
+                            <a href="{{ notif.link }}" class="btn-small">Voir</a>
+                        {% endif %}
+                        {% if not notif.is_read %}
+                            <a href="index.php?action=mark_notification_read&id={{ notif.id }}" class="btn-small btn-outline" title="Marquer comme lu">✓</a>
+                        {% endif %}
+                        <a href="index.php?action=delete_notification&id={{ notif.id }}" class="btn-small btn-danger" title="Supprimer" onclick="return confirm('Supprimer cette notification ?');">🗑</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <p>🔔 Aucune notification pour le moment.</p>
+    </div>
+{% endif %}
+{% endblock %}

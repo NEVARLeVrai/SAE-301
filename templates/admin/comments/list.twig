@@ -1,0 +1,79 @@
+{% extends 'base.twig' %}
+
+{% block title %} - Commentaires{% endblock %}
+
+{% block content %}
+<h1>Modération des Commentaires</h1>
+
+<p>Gérez les commentaires des utilisateurs sur les articles du blog.</p>
+
+{# Filtres #}
+<div class="filter-bar mb-3">
+    <a href="index.php?action=comments&filter=pending" class="btn {{ filter is not defined or filter == 'pending' ? '' : 'btn-secondary' }}">
+        En attente
+    </a>
+    <a href="index.php?action=comments&filter=approved" class="btn {{ filter is defined and filter == 'approved' ? '' : 'btn-secondary' }}">
+        Approuvés
+    </a>
+    <a href="index.php?action=comments&filter=all" class="btn {{ filter is defined and filter == 'all' ? '' : 'btn-secondary' }}">
+        Tous
+    </a>
+</div>
+
+{% if comments is defined and comments|length > 0 %}
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Article</th>
+                <th>Auteur</th>
+                <th>Commentaire</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.id }}</td>
+                    <td>
+                        <a href="../visiteur/index.php?action=article_details&id={{ comment.article_id }}" target="_blank">
+                            {{ comment.article_title|default('Article #' ~ comment.article_id) }}
+                        </a>
+                    </td>
+                    <td>{{ comment.username }}</td>
+                    <td>
+                        <div class="comment-preview" title="{{ comment.content }}">
+                            {{ comment.content|slice(0, 100) }}{{ comment.content|length > 100 ? '...' : '' }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if comment.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elseif comment.status == 'approved' %}
+                            <span class="badge badge-success">Approved</span>
+                        {% else %}
+                            <span class="badge badge-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ comment.created_at|date('d/m/Y H:i') }}</td>
+                    <td class="actions">
+                        {% if comment.status == 'pending' %}
+                            <a href="index.php?action=approve_comment&id={{ comment.id }}" class="btn-small btn-success" title="Approuver">✓</a>
+                            <a href="index.php?action=reject_comment&id={{ comment.id }}" class="btn-small btn-warning" title="Rejeter">✗</a>
+                        {% endif %}
+                        <a href="index.php?action=delete_comment&id={{ comment.id }}" class="btn-small btn-danger" title="Supprimer" onclick="return confirm('Supprimer ce commentaire ?');">🗑</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <div class="alert alert-info">
+        <p>Aucun commentaire à afficher.</p>
+    </div>
+{% endif %}
+{% endblock %}

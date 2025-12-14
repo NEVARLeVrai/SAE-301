@@ -18,6 +18,7 @@ Site de partage et d'échange sur la musique proposant :
 - Serveur Apache avec PHP 7.4+
 - MySQL 5.7+ / MariaDB
 - Extension PDO activée
+- **Twig 3.x** (inclus dans le dossier `vendor/`)
 
 ### Configuration
 1. Importer le fichier `bdd/script_creation_bdd.sql` dans phpMyAdmin
@@ -31,15 +32,6 @@ Site de partage et d'échange sur la musique proposant :
 ```
 
 3. S'assurer que les dossiers `assets/` et `img/` existent et sont accessibles en écriture pour les uploads
-
----
-
-## URLs d'accès
-
-| Section | URL |
-|---------|-----|
-| **Front-office (Visiteur)** | `` |
-| **Back-office (Admin)** | `` |
 
 ---
 
@@ -60,6 +52,7 @@ Site de partage et d'échange sur la musique proposant :
 SAE 301/
 ├── index.php                 # Page d'accueil (choix du rôle)
 ├── README.md                 # Ce fichier
+├── composer.json             # Dépendances PHP (Twig)
 ├── bdd/
 │   └── script_creation_bdd.sql
 ├── controllers/
@@ -67,6 +60,8 @@ SAE 301/
 │   │   └── index.php         # Contrôleur administration
 │   └── visiteur/
 │       └── index.php         # Contrôleur visiteur
+├── include/
+│   └── twig.php              # Configuration Twig
 ├── modeles/
 │   ├── Database.php          # Connexion BDD
 │   ├── Validator.php         # Validation des données (centralisée)
@@ -86,10 +81,35 @@ SAE 301/
 │   ├── Permission.php        # Matrice permissions (US-30)
 │   ├── Rapport.php           # Rapports et exports (US-27)
 │   └── FileUpload.php        # Gestion uploads fichiers (US-23)
-├── vues/
-│   ├── admin/                # Vues back-office
-│   ├── visiteur/             # Vues front-office
-│   └── global/               # Header/Footer partagés
+├── templates/                # Templates Twig
+│   ├── base.twig             # Layout principal (header + footer)
+│   ├── admin/                # Templates back-office
+│   │   ├── login.twig
+│   │   ├── dashboard.twig
+│   │   ├── configurations.twig
+│   │   ├── articles/
+│   │   ├── cours/
+│   │   ├── produits/
+│   │   ├── users/
+│   │   ├── comments/
+│   │   ├── orders/
+│   │   ├── tags/
+│   │   ├── notifications/
+│   │   ├── reports/
+│   │   ├── permissions/
+│   │   ├── role_requests/
+│   │   └── moderation_requests/
+│   └── visiteur/             # Templates front-office
+│       ├── accueil.twig
+│       ├── contact.twig
+│       ├── mentions_legales.twig
+│       ├── articles/
+│       ├── cours/
+│       ├── produits/
+│       ├── orders/
+│       ├── auth/
+│       └── favorites/
+├── vendor/                   # Dépendances Composer (Twig)
 ├── css/
 │   └── style.css             # Styles personnalisés
 ├── assets/                   # Images et fichiers uploadés
@@ -209,11 +229,53 @@ Les formulaires de login et d'inscription utilisent cette validation centralisé
 | Technologie | Utilisation |
 |-------------|-------------|
 | **PHP 7.4+** | Backend (POO) |
+| **Twig 3.x** | Moteur de templates |
 | **MySQL/MariaDB** | Base de données |
 | **PDO** | Connexion sécurisée BDD |
 | **HTML5/CSS3** | Frontend (Grid, Flexbox) |
 | **Bootstrap 5** | Framework CSS |
 | **Bootstrap Icons** | Icônes |
 | **Poppins** | Police Google Fonts |
+
+---
+
+## Architecture Twig
+
+Le projet utilise **Twig** comme moteur de templates pour séparer la logique PHP de l'affichage HTML.
+
+### Principe de fonctionnement
+
+```
+Contrôleur (PHP)          →    Template (Twig)         →    Page HTML
+controllers/visiteur/          templates/visiteur/          Rendu final
+index.php                      accueil.twig
+```
+
+### Template de base (`templates/base.twig`)
+Contient le header, footer et la structure HTML commune. Les pages héritent de ce template :
+
+```twig
+{% extends 'base.twig' %}
+
+{% block title %}Ma Page{% endblock %}
+
+{% block content %}
+    <h1>Contenu de la page</h1>
+    {{ ma_variable }}
+{% endblock %}
+```
+
+### Fonctions Twig personnalisées
+- `asset('chemin')` : Génère le chemin vers les assets
+- `is_logged_in()` : Vérifie si un utilisateur est connecté
+- `is_admin_logged_in()` : Vérifie si un admin est connecté
+- `user_role()` / `admin_role()` : Retourne le rôle de l'utilisateur
+
+### Variables globales disponibles
+- `session` : Toutes les variables de session
+- `user_logged_in`, `user_name`, `user_id`, `user_role`
+- `admin_logged_in`, `admin_name`, `admin_id`, `admin_role`
+- `current_action` : L'action GET actuelle
+- `breadcrumbs` : Fil d'Ariane
 
 ---

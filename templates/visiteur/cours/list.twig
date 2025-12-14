@@ -1,0 +1,68 @@
+{#
+    ===========================================
+    LISTE DES COURS - OmniMusique (US-01, US-12)
+    ===========================================
+    Affiche les cours avec filtres par instrument, niveau, style.
+    Variables : cours, instruments, niveaux, styles, filters
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Cours{% endblock %}
+
+{% block content %}
+<h1>Nos Cours de Musique</h1>
+<p>Recherchez et consultez des cours adaptés à votre niveau.</p>
+
+{# Formulaire de filtres (US-12) #}
+<form action="index.php" method="GET" class="filter-form mb-2">
+    <input type="hidden" name="action" value="cours">
+    
+    <div class="filter-group">
+        <select name="instrument">
+            <option value="">Tous les instruments</option>
+            {% for inst in instruments %}
+                <option value="{{ inst }}" {% if current_instrument == inst %}selected{% endif %}>
+                    🎵 {{ inst }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="level">
+            <option value="">Tous les niveaux</option>
+            {% for lvl in levels %}
+                <option value="{{ lvl }}" {% if current_level == lvl %}selected{% endif %}>
+                    🎯 {{ lvl }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="category">
+            <option value="">Toutes les catégories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>
+                    🎼 {{ cat }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-small">Filtrer</button>
+        <a href="index.php?action=cours" class="btn btn-small btn-admin">Réinitialiser</a>
+    </div>
+</form>
+
+<div class="cours-container">
+    {% if liste_cours is defined and liste_cours|length > 0 %}
+        {% for row in liste_cours %}
+            <div class="cours-card">
+                <h2>{{ row.title }}</h2>
+                <p class="card-meta"><strong>Instrument :</strong> {{ row.instrument }} | <strong>Niveau :</strong> {{ row.level }}</p>
+                <p class="card-content">{{ row.description }}</p>
+                <p><small>Par {{ row.author }}</small></p>
+                <a href="index.php?action=cours_details&id={{ row.id }}" class="btn">Voir le cours</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun cours ne correspond à vos critères.</p>
+    {% endif %}
+</div>
+{% endblock %}

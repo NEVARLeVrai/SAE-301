@@ -15,7 +15,7 @@ class Database {
     private $host = "localhost";
     private $db_name = "sae301_musique_SOARES_Daniels"; 
     private $username = "root";
-    private $password = "root"; 
+    private $password = ""; 
     public $conn;
 
     /**

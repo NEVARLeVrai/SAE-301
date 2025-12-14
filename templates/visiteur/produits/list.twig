@@ -1,0 +1,42 @@
+{#
+    ===========================================
+    BOUTIQUE - LISTE DES PRODUITS (US-03)
+    ===========================================
+    Affiche les produits avec ajout au panier.
+    Variables : liste_produits, user_logged_in
+#}
+{% extends 'base.twig' %}
+
+{% block title %} - Boutique{% endblock %}
+
+{% block content %}
+<h1>Boutique en ligne</h1>
+<p>Partitions, Instruments et Accessoires.</p>
+
+<div class="products-container">
+    {% if liste_produits is defined and liste_produits|length > 0 %}
+        {% for row in liste_produits %}
+            <div class="product-card">
+                {% if row.image_url %}
+                    <img src="../../assets/{{ row.image_url }}" alt="{{ row.name }}" class="product-card-img">
+                {% endif %}
+                <h2><a href="index.php?action=produit_details&id={{ row.id }}">{{ row.name }}</a></h2>
+                <p class="product-price">{{ row.price|number_format(2, ',', ' ') }} €</p>
+                <p>{{ row.description }}</p>
+                <p><small>Catégorie : {{ row.category }}</small></p>
+                
+                <div class="product-actions">
+                    <a href="index.php?action=produit_details&id={{ row.id }}" class="btn btn-small btn-admin">Voir détails</a>
+                    {% if row.stock > 0 %}
+                        <a href="index.php?action=add_to_cart&id={{ row.id }}" class="btn btn-small">Ajouter au panier</a>
+                    {% else %}
+                        <span class="btn btn-small btn-admin btn-disabled">Rupture de stock</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun produit disponible.</p>
+    {% endif %}
+</div>
+{% endblock %}

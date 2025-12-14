@@ -1,0 +1,42 @@
+{% extends 'base.twig' %}
+
+{% block title %} - {{ cours.title }}{% endblock %}
+
+{% block content %}
+<div class="cours-detail-container">
+    <a href="index.php?action=cours" class="btn btn-secondary mb-2">&larr; Retour aux cours</a>
+    
+    <div class="card">
+        <div class="cours-body">
+            <h1>{{ cours.title }}</h1>
+            <p class="card-meta">
+                <strong>Instrument :</strong> {{ cours.instrument }} | 
+                <strong>Niveau :</strong> {{ cours.level }} | 
+                <strong>Catégorie :</strong> {{ cours.category }}
+            </p>
+            <p><small>Par {{ cours.author }}</small></p>
+            
+            <div class="cours-content mt-3">
+                {{ cours.content|nl2br }}
+            </div>
+            
+            {# US-16 : Favoris #}
+            <div class="cours-actions mt-3">
+                {% if user_logged_in %}
+                    {% if is_favorite %}
+                        <a href="index.php?action=remove_favorite&item_id={{ cours.id }}&item_type=course&from=detail" class="btn btn-danger">
+                            ❤️ Retirer des favoris
+                        </a>
+                    {% else %}
+                        <a href="index.php?action=add_favorite&item_id={{ cours.id }}&item_type=course" class="btn btn-secondary">
+                            🤍 Ajouter aux favoris
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="index.php?action=login" class="btn btn-secondary">🤍 Ajouter aux favoris</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
