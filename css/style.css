@@ -527,11 +527,7 @@ textarea {
     margin-bottom: 2rem;
 }
 
-@media (max-width: 768px) {
-    .admin-grid {
-        grid-template-columns: 1fr;
-    }
-}
+
 
 .admin-card {
     background: var(--white);
@@ -1072,6 +1068,140 @@ body.login-page {
 /* =========================================
    7. Media Queries (Responsive)
    ========================================= */
+
+/* Navbar Mobile Styles */
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+
+.navbar-collapse {
+    background-color: transparent;
+}
+
+@media (max-width: 991.98px) {
+    /* FORCE le logo à ne PAS prendre toute la largeur */
+    
+
+    .navbar-brand,
+    .mobile-nav-fix .navbar-brand,
+    header .navbar-brand,
+    header .navbar .navbar-brand,
+    .navbar > .navbar-brand {
+        width: auto !important;
+        max-width: fit-content !important;
+        flex-grow: 0 !important;
+        flex-shrink: 0 !important;
+        flex-basis: auto !important;
+        display: inline-block !important;
+        font-size: 1rem !important;
+    }
+    
+    .navbar-brand i {
+        font-size: 1rem;
+    }
+    
+    .mobile-nav-fix .navbar-toggler {
+        flex: 0 0 auto !important;
+    }
+    
+    .mobile-nav-fix .navbar-collapse {
+        flex-basis: 100% !important;
+    }
+    
+    .navbar-collapse {
+        background-color: rgba(46, 16, 101, 0.98);
+        padding: 1rem;
+        margin-top: 0.5rem;
+        border-radius: var(--border-radius);
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+    
+    header .container {
+        position: relative;
+    }
+    
+    /* Menu aligné à gauche, pas centré */
+    .navbar-nav {
+        gap: 0.25rem;
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-sm);
+        text-align: left;
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-nav .dropdown-menu {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        padding: 0.5rem;
+        position: static !important;
+        width: 100%;
+    }
+    
+    .navbar-nav .dropdown-menu .dropdown-item {
+        color: rgba(255, 255, 255, 0.9);
+        border-radius: var(--border-radius-sm);
+        text-align: left;
+    }
+    
+    .navbar-nav .dropdown-menu .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Boutons panier/admin sur mobile */
+    header .d-flex.gap-2 {
+        justify-content: flex-start;
+    }
+}
+
+/* Très petits écrans (smartphones) */
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 0.9rem !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+    
+    .navbar-brand i {
+        display: none;
+    }
+    
+    header .navbar {
+        justify-content: space-between;
+    }
+}
+
+/* Ultra petits écrans */
+@media (max-width: 400px) {
+    .navbar-brand {
+        font-size: 0.8rem !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+    
+    .navbar-toggler {
+        padding: 0.25rem 0.5rem;
+        flex: 0 0 auto;
+    }
+    
+    header {
+        padding: 0.25rem 0.5rem !important;
+    }
+}
+
 @media (max-width: 1200px) {
     header nav ul {
         gap: 0.5rem;
@@ -1225,7 +1355,7 @@ a.card:hover h3 {
     color: var(--text-light);
 }
 
-/* Note: .btn-facebook, .btn-twitter, .btn-linkedin sont définis dans la section Buttons */
+/* Remarque : .btn-facebook, .btn-twitter, .btn-linkedin sont définis dans la section Buttons */
 
 /* =========================================
    8.2 US-31 : Fil d'Ariane (Breadcrumb)
@@ -1368,4 +1498,39 @@ a.card:hover h3 {
 /* Header dropdown */
 .nav-link-violet {
     color: #a78bfa !important;
+}
+
+/* =========================================
+    9. Transitions douces pour les composants "card"
+    Ajout : appliquer une transition visuelle plus fluide aux composants de type carte
+    ========================================= */
+.card, .cours-card, .article-card, .product-card, .role-card, .comment-card, .review-card,
+.admin-card, .notification-card, .stat-card, .login-card {
+    transition: all 0.3s ease !important;
+}
+
+/* Les images à l'intérieur des cartes et des vues détaillées doivent également
+    bénéficier d'une transition fluide */
+.card img, .article-card-img, .product-card-img, .article-detail-img, .product-detail-img {
+    transition: all 0.3s ease;
+}
+
+/* Sections hero et principales : transition visuelle plus douce lorsque les styles changent */
+.hero-section, .hero-section h1, .hero-section p, .text-center.mb-5 {
+    transition: all 0.25s ease !important;
+    will-change: transform, opacity, font-size;
+}
+
+/* Grilles et conteneurs */
+.cours-container, .blog-container, .products-container, .grid-3, .categories-grid {
+    transition: gap 0.25s ease, grid-template-columns 0.25s ease, transform 0.25s ease;
+    will-change: transform, grid-template-columns, gap;
+}
+
+/* Conteneur / main : les changements de mise en page (ex. largeur) ne sont pas
+   toujours animables, mais on peut animer le padding, la largeur maximale
+   ou la transformation pour améliorer la perception de fluidité. */
+.container, main {
+    transition: padding 0.25s ease, max-width 0.25s ease, transform 0.25s ease;
+    will-change: padding, max-width, transform;
 }

@@ -34,20 +34,15 @@
 <body{% if is_admin %} class="admin-body"{% endif %}>
     <header class="{% if is_admin %}admin-header{% endif %}">
         <div class="container">
-            <nav class="d-flex align-items-center">
-                <div class="logo me-auto">
-                    {% if is_admin %}
-                        <a href="{{ base_path }}controllers/visiteur/index.php?action=accueil" class="text-decoration-none fs-5 fw-bold text-white">
-                            <i class="bi bi-music-note-beamed me-2"></i>OmniMusique
-                        </a>
-                    {% else %}
-                        <a href="index.php?action=accueil" class="text-decoration-none fs-5 fw-bold text-white">
-                            <i class="bi bi-music-note-beamed me-2"></i>OmniMusique
-                        </a>
-                    {% endif %}
-                </div>
-                
-                <ul class="nav mx-auto">
+            <nav class="navbar navbar-expand-lg navbar-dark p-0 mobile-nav-fix" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%;">
+                <a class="navbar-brand fw-bold" style="max-width: 70vw; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto;" href="{% if is_admin %}{{ base_path }}controllers/visiteur/index.php?action=accueil{% else %}index.php?action=accueil{% endif %}">
+                    <i class="bi bi-music-note-beamed me-2"></i>OmniMusique
+                </a>
+                <button class="navbar-toggler border-0" style="flex-shrink:0; margin-left: 1rem;" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                     {% if is_admin %}
                         {# Menu Admin #}
                         <li class="nav-item">
@@ -160,18 +155,20 @@
                             </li>
                         {% endif %}
                     {% endif %}
-                </ul>
-                
-                {% if not is_admin %}
-                    <div class="ms-auto d-flex align-items-center">
-                        <a class="btn btn-outline-secondary btn-sm" href="index.php?action=panier">
-                            <i class="bi bi-cart me-1"></i> Panier
-                        </a>
-                        <a class="btn btn-outline-secondary btn-sm ms-2" href="{{ base_path }}controllers/admin/index.php">
-                            <i class="bi bi-shield-lock me-1"></i> Admin
-                        </a>
-                    </div>
-                {% endif %}
+                    </ul>
+                    
+                    {# Boutons à droite #}
+                    {% if not is_admin %}
+                        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                            <a class="btn btn-outline-light btn-sm" href="index.php?action=panier">
+                                <i class="bi bi-cart me-1"></i> Panier
+                            </a>
+                            <a class="btn btn-outline-light btn-sm" href="{{ base_path }}controllers/admin/index.php">
+                                <i class="bi bi-shield-lock me-1"></i> Admin
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </nav>
         </div>
     </header>
