@@ -3,7 +3,7 @@
         'name' => 'omnimusique/sae-301',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '3b0735343eb84c525905f9ba110f487fcdd74683',
+        'reference' => '9b6ba46752c08b3ed546f67d06c949ab11246393',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'omnimusique/sae-301' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '3b0735343eb84c525905f9ba110f487fcdd74683',
+            'reference' => '9b6ba46752c08b3ed546f67d06c949ab11246393',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
