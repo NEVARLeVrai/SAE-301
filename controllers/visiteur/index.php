@@ -569,20 +569,22 @@ switch ($action) {
                 $currentUser = $userModel->getUserById($_SESSION['user_id']);
                 
                 if ($currentUser) {
-                    $to = $currentUser['email'];
-                    $subject = "Confirmation de votre commande - OmniMusique";
-                    $body = "Bonjour " . htmlspecialchars($_SESSION['user_name']) . ",\n\n";
-                    $body .= "Nous vous confirmons la réception de votre commande.\n";
-                    $body .= "Montant total : " . number_format($total, 2) . " €\n\n";
-                    $body .= "Détail de la commande :\n";
-                    foreach ($items as $item) {
-                        $body .= "- Produit ID " . $item['product_id'] . " x " . $item['quantity'] . " (" . $item['price'] . " €)\n";
-                    }
-                    $body .= "\nMerci de votre confiance.\nL'équipe OmniMusique";
-                    $headers = "From: no-reply@omnimusique.fr" . "\r\n" .
-                               "X-Mailer: PHP/" . phpversion();
+                    // Préparation de l'email, désactivé car non fonctionnel en local, il n'y a pas de serveur mail
 
-                    @mail($to, $subject, $body, $headers);
+                    // $to = $currentUser['email'];
+                    // $subject = "Confirmation de votre commande - OmniMusique";
+                    // $body = "Bonjour " . htmlspecialchars($_SESSION['user_name']) . ",\n\n";
+                    // $body .= "Nous vous confirmons la réception de votre commande.\n";
+                    // $body .= "Montant total : " . number_format($total, 2) . " €\n\n";
+                    // $body .= "Détail de la commande :\n";
+                    // foreach ($items as $item) {
+                    //     $body .= "- Produit ID " . $item['product_id'] . " x " . $item['quantity'] . " (" . $item['price'] . " €)\n";
+                    // }
+                    // $body .= "\nMerci de votre confiance.\nL'équipe OmniMusique";
+                    // $headers = "From: no-reply@omnimusique.fr" . "\r\n" .
+                    //            "X-Mailer: PHP/" . phpversion();
+
+                    // @mail($to, $subject, $body, $headers);
                 }
 
                 unset($_SESSION['panier']);
