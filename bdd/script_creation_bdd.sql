@@ -18,10 +18,10 @@
 -- ===========================================
 
 -- Création de la base de données
-CREATE DATABASE IF NOT EXISTS sae301_musique_SOARES_Daniels CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS soares_sae301 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Utilisation de la base de données
-USE sae301_musique_SOARES_Daniels;
+USE soares_sae301;
 
 -- ===========================================
 -- TABLES SPRINT 1 & 2
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL, 
-    role ENUM('admin', 'redacteur', 'musicien', 'visiteur') DEFAULT 'visiteur',
+    role ENUM('admin', 'redacteur', 'musicien', 'visiteur', 'responsable_annonce') DEFAULT 'visiteur',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -266,6 +266,7 @@ INSERT INTO role_permissions (role, permission, is_allowed) VALUES
 ('admin', 'moderate_content', TRUE),
 ('admin', 'view_reports', TRUE),
 ('admin', 'export_data', TRUE),
+('admin', 'manage_annonces', TRUE),
 ('redacteur', 'manage_users', FALSE),
 ('redacteur', 'manage_articles', TRUE),
 ('redacteur', 'manage_courses', FALSE),
@@ -275,6 +276,7 @@ INSERT INTO role_permissions (role, permission, is_allowed) VALUES
 ('redacteur', 'moderate_content', TRUE),
 ('redacteur', 'view_reports', FALSE),
 ('redacteur', 'export_data', FALSE),
+('redacteur', 'manage_annonces', FALSE),
 ('musicien', 'manage_users', FALSE),
 ('musicien', 'manage_articles', FALSE),
 ('musicien', 'manage_courses', FALSE),
@@ -283,7 +285,17 @@ INSERT INTO role_permissions (role, permission, is_allowed) VALUES
 ('musicien', 'manage_configurations', FALSE),
 ('musicien', 'moderate_content', FALSE),
 ('musicien', 'view_reports', FALSE),
-('musicien', 'export_data', FALSE)
+('musicien', 'export_data', FALSE),
+('responsable_annonce', 'manage_users', FALSE),
+('responsable_annonce', 'manage_articles', FALSE),
+('responsable_annonce', 'manage_courses', FALSE),
+('responsable_annonce', 'manage_products', FALSE),
+('responsable_annonce', 'manage_orders', FALSE),
+('responsable_annonce', 'manage_configurations', FALSE),
+('responsable_annonce', 'moderate_content', FALSE),
+('responsable_annonce', 'view_reports', FALSE),
+('responsable_annonce', 'export_data', FALSE),
+('responsable_annonce', 'manage_annonces', TRUE)
 ON DUPLICATE KEY UPDATE is_allowed = VALUES(is_allowed);
 
 -- ==========================================
@@ -291,11 +303,12 @@ ON DUPLICATE KEY UPDATE is_allowed = VALUES(is_allowed);
 -- ==========================================
 
 -- Utilisateurs (Mots de passe à hacher en prod)
--- 1: Admin, 2: Rédacteur, 3: Musicien, 4: Visiteur
+-- 1: Admin, 2: Rédacteur, 3: Musicien, 4: Visiteur 5. Responsable Annonce
 INSERT INTO users (username, email, password, role) VALUES
 ('Admin', 'admin@omnimusique.com', '$2y$10$lGU5t5heQdxSVp53/lBROuyJqizS1y4LJfSE.gOog.a3RwlnUqvY6', 'admin'),
 ('Redacteur', 'redac@omnimusique.com', '$2y$10$dplxSldV1YJyQBYzL8G7K.ifDJQNxBzTete.yLtMjAM4oWAJpWYcS', 'redacteur'),
 ('Mozart', 'mozart@omnimusique.com', '$2y$10$ApTf.IUGiBprYAm.N2gQg.7ev3GbugmDNXIRZ9F7CaZfBe5lXqPrW', 'musicien'),
+('RespAnnonce', 'resp.annonce@omnimusique.com', '$2y$10$rO48L3DzrF86ElwQ1UN/2..QLl3cVIpyk3ZT/1W9bXaGf4TTaaRHi', 'responsable_annonce'),
 ('Visiteur', 'visiteur@omnimusique.com', '$2y$10$tU3KqyKpi7nQx2T3agbEh.lrq1h5SIgXbvneDsX0wG6ZOxc3Cj.ae', 'visiteur');
 
 -- Cours

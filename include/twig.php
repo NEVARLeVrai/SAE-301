@@ -68,6 +68,11 @@ function init_twig($templatePath = null) {
     $twig->addFunction(new TwigFunction('admin_role', function () {
         return isset($_SESSION['admin_role']) ? $_SESSION['admin_role'] : null;
     }));
+
+    // Fonction Twig pour vérifier une permission (lit le cache de session `admin_permissions`)
+    $twig->addFunction(new TwigFunction('has_permission', function ($permission) {
+        return isset($_SESSION['admin_permissions']) && is_array($_SESSION['admin_permissions']) && isset($_SESSION['admin_permissions'][$permission]) ? (bool)$_SESSION['admin_permissions'][$permission] : false;
+    }));
     
     return $twig;
 }

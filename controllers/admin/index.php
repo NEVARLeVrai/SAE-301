@@ -42,6 +42,8 @@ include_once '../../modeles/ModerationRequest.php'; // US-10
 include_once '../../modeles/Permission.php'; // US-30
 include_once '../../modeles/Rapport.php';    // US-27
 include_once '../../modeles/FileUpload.php'; // US-23
+// Fonctions d'autorisation centralisée (utilise Permission)
+include_once '../../include/authorization.php';
 
 // Connexion à la base de données (singleton pattern)
 $database = new Database();
@@ -76,11 +78,13 @@ if ($action == 'login') {
 
             if ($user->loginFromPost()) {
                 // Vérification du rôle
-                if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien'])) {
+                if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien', 'responsable_annonce'])) {
                     $_SESSION['admin_logged_in'] = true;
                     $_SESSION['admin_id'] = $user->getId();
                     $_SESSION['admin_name'] = $user->getUsername();
                     $_SESSION['admin_role'] = $user->getRole();
+                    // Charger en cache les permissions du rôle pour usage dans les pages et Twig
+                    loadRolePermissionsIntoSession($db, $user->getRole());
                     header('Location: index.php?action=dashboard');
                     exit;
                 } else {
@@ -147,9 +151,7 @@ if (in_array($action, $redirectActions)) {
     switch ($action) {
         // US-26 : Suppression d'un utilisateur (Admin uniquement)
         case 'delete_user':
-            if ($_SESSION['admin_role'] !== 'admin') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'manage_users');
             if (isset($_GET['id'])) {
                 if ($_GET['id'] == $_SESSION['admin_id']) {
                     die("Impossible de supprimer son propre compte.");
@@ -163,12 +165,13 @@ if (in_array($action, $redirectActions)) {
         // US-36 : Suppression d'un article (soft delete)
         // Rédacteur : uniquement SES articles | Admin : tous (US-37)
         case 'delete_article':
+            requirePermission($db, 'manage_articles');
             if (isset($_GET['id'])) {
                 $articleModel = new Article($db);
                 $existingArticle = $articleModel->getArticleById($_GET['id']);
                 
-                // Vérification des droits (Rédacteur = ses articles uniquement)
-                if ($_SESSION['admin_role'] === 'redacteur') {
+                // Vérification des droits (règle centralisée : rédacteur => ses articles uniquement)
+                if (isRestrictedToOwn('articles')) {
                     if (!$existingArticle || $existingArticle['author_id'] != $_SESSION['admin_id']) {
                         die("Accès refusé : Vous ne pouvez supprimer que vos propres articles.");
                     }
@@ -184,22 +187,21 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         // US-34 : Suppression d'un produit (soft delete)
-        // Musicien : uniquement SES produits | Admin : tous (US-37)
+        // Contrôle via permissions : possibilité que le rôle 'musicien' puisse seulement gérer ses produits
         case 'delete_produit':
-            if ($_SESSION['admin_role'] === 'redacteur') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'manage_products');
+
             if (isset($_GET['id'])) {
                 $produitModel = new Produit($db);
                 $existingProduct = $produitModel->getProductById($_GET['id']);
-                
-                // Vérification des droits (Musicien = ses produits uniquement)
-                if ($_SESSION['admin_role'] === 'musicien') {
+
+                // Si le rôle est restreint aux produits propres (musicien) : seulement ses produits
+                if (isRestrictedToOwn('produits')) {
                     if (!$existingProduct || $existingProduct['seller_id'] != $_SESSION['admin_id']) {
                         die("Accès refusé : Vous ne pouvez supprimer que vos propres produits.");
                     }
                 }
-                
+
                 // Supprimer les fichiers liés (image, file)
                 if ($existingProduct) {
                     if (!empty($existingProduct['image_url'])) {
@@ -215,9 +217,7 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'delete_cours':
-            if ($_SESSION['admin_role'] === 'musicien') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'manage_courses');
             if (isset($_GET['id'])) {
                 $coursModel = new Cours($db);
                 $coursModel->delete($_GET['id']);
@@ -226,13 +226,11 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'delete_comment':
-            if ($_SESSION['admin_role'] === 'musicien') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'moderate_content');
             if (isset($_GET['id'])) {
                 $commentModel = new Commentaire($db);
-                // Vérification pour rédacteur : seulement ses articles
-                if ($_SESSION['admin_role'] === 'redacteur') {
+                // Vérification pour roles restreints aux articles : seulement ses articles
+                if (isRestrictedToOwn('articles')) {
                     if (!$commentModel->isCommentOnAuthorArticle($_GET['id'], $_SESSION['admin_id'])) {
                         die("Accès refusé : Vous ne pouvez supprimer que les commentaires sur vos propres articles.");
                     }
@@ -243,13 +241,11 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'approve_comment':
-            if ($_SESSION['admin_role'] === 'musicien') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'moderate_content');
             if (isset($_GET['id'])) {
                 $commentaireModel = new Commentaire($db);
-                // Vérification pour rédacteur : seulement ses articles
-                if ($_SESSION['admin_role'] === 'redacteur') {
+                // Vérification pour roles restreints aux articles : seulement ses articles
+                if (isRestrictedToOwn('articles')) {
                     if (!$commentaireModel->isCommentOnAuthorArticle($_GET['id'], $_SESSION['admin_id'])) {
                         die("Accès refusé : Vous ne pouvez modérer que les commentaires sur vos propres articles.");
                     }
@@ -260,13 +256,11 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'reject_comment':
-            if ($_SESSION['admin_role'] === 'musicien') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'moderate_content');
             if (isset($_GET['id'])) {
                 $commentaireModel = new Commentaire($db);
-                // Vérification pour rédacteur : seulement ses articles
-                if ($_SESSION['admin_role'] === 'redacteur') {
+                // Vérification pour roles restreints aux articles : seulement ses articles
+                if (isRestrictedToOwn('articles')) {
                     if (!$commentaireModel->isCommentOnAuthorArticle($_GET['id'], $_SESSION['admin_id'])) {
                         die("Accès refusé : Vous ne pouvez modérer que les commentaires sur vos propres articles.");
                     }
@@ -299,7 +293,8 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'approve_product':
-            if ($_SESSION['admin_role'] !== 'admin') {
+            // Vérifier moderate_content ou manage_annonces
+            if (empty($_SESSION['admin_permissions']['moderate_content']) && empty($_SESSION['admin_permissions']['manage_annonces'])) {
                 die("Accès refusé.");
             }
             if (isset($_GET['id'])) {
@@ -309,11 +304,12 @@ if (in_array($action, $redirectActions)) {
                     $produitModel->update($product['id'], $product['name'], $product['description'], $product['price'], $product['stock'], $product['category'], $product['type'], $product['image_url'], $product['file_url'], 'approved');
                 }
             }
-            header('Location: index.php?action=moderation');
+            header('Location: index.php?action=produits');
             exit;
 
         case 'reject_product':
-            if ($_SESSION['admin_role'] !== 'admin') {
+            // Vérifier moderate_content ou manage_annonces
+            if (empty($_SESSION['admin_permissions']['moderate_content']) && empty($_SESSION['admin_permissions']['manage_annonces'])) {
                 die("Accès refusé.");
             }
             if (isset($_GET['id'])) {
@@ -323,14 +319,12 @@ if (in_array($action, $redirectActions)) {
                     $produitModel->update($product['id'], $product['name'], $product['description'], $product['price'], $product['stock'], $product['category'], $product['type'], $product['image_url'], $product['file_url'], 'rejected');
                 }
             }
-            header('Location: index.php?action=moderation');
+            header('Location: index.php?action=produits');
             exit;
 
         // US-39 : Validation demande de rôle (Visiteur -> Rédacteur/Musicien)
         case 'approve_role_request':
-            if ($_SESSION['admin_role'] !== 'admin') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'manage_users');
             if (isset($_GET['id'])) {
                 $roleRequestModel = new RoleRequest($db);
                 // Change automatiquement le rôle de l'utilisateur
@@ -341,9 +335,7 @@ if (in_array($action, $redirectActions)) {
 
         // US-39 : Rejet demande de rôle
         case 'reject_role_request':
-            if ($_SESSION['admin_role'] !== 'admin') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'manage_users');
             if (isset($_GET['id'])) {
                 $roleRequestModel = new RoleRequest($db);
                 $roleRequestModel->reject($_GET['id'], $_SESSION['admin_id']);
@@ -351,9 +343,7 @@ if (in_array($action, $redirectActions)) {
             header('Location: index.php?action=role_requests');
             exit;
         case 'approve_mreq':
-            if ($_SESSION['admin_role'] !== 'admin') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'moderate_content');
             if (isset($_GET['id'])) {
                 $mreq = new ModerationRequest($db);
                 $mreq->approve($_GET['id'], $_SESSION['admin_id']);
@@ -362,9 +352,7 @@ if (in_array($action, $redirectActions)) {
             exit;
 
         case 'reject_mreq':
-            if ($_SESSION['admin_role'] !== 'admin') {
-                die("Accès refusé.");
-            }
+            requirePermission($db, 'moderate_content');
             if (isset($_GET['id'])) {
                 $mreq = new ModerationRequest($db);
                 $mreq->reject($_GET['id'], $_SESSION['admin_id']);
@@ -377,9 +365,7 @@ if (in_array($action, $redirectActions)) {
 // --- TRAITEMENT DES ACTIONS AVEC REDIRECTION (AVANT LE HEADER) ---
 // Suppression de tag
 if ($action === 'tags' && isset($_GET['delete_id'])) {
-    if ($_SESSION['admin_role'] !== 'admin') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'manage_users'); // Tags = admin
     $tagModel = new Tag($db);
     $tagModel->delete($_GET['delete_id']);
     header('Location: index.php?action=tags');
@@ -388,9 +374,7 @@ if ($action === 'tags' && isset($_GET['delete_id'])) {
 
 // --- TRAITEMENT POST edit_user (AVANT HEADER) ---
 if ($action === 'edit_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SESSION['admin_role'] !== 'admin') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'manage_users');
     $userModel = new User($db);
     if ($userModel->updateFromPost()) {
         header('Location: index.php?action=users');
@@ -400,9 +384,7 @@ if ($action === 'edit_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // --- TRAITEMENT POST create_cours (AVANT HEADER) ---
 if ($action === 'create_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SESSION['admin_role'] === 'musicien') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'manage_courses');
     $coursModel = new Cours($db);
     if ($coursModel->createFromPost($_SESSION['admin_id'])) {
         header('Location: index.php?action=cours');
@@ -412,9 +394,7 @@ if ($action === 'create_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // --- TRAITEMENT POST edit_cours (AVANT HEADER) ---
 if ($action === 'edit_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SESSION['admin_role'] === 'musicien') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'manage_courses');
     $coursModel = new Cours($db);
     if ($coursModel->updateFromPost()) {
         header('Location: index.php?action=cours');
@@ -443,7 +423,7 @@ if ($action === 'edit_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $articleModel = new Article($db);
     $id = $articleModel->getIdFromPost();
     
-    if ($_SESSION['admin_role'] === 'redacteur') {
+    if (isRestrictedToOwn('articles')) {
         $existingArticle = $articleModel->getArticleById($id);
         if ($existingArticle['author_id'] != $_SESSION['admin_id']) {
             die("Accès refusé : Vous ne pouvez modifier que vos propres articles.");
@@ -469,8 +449,19 @@ if ($action === 'edit_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // --- TRAITEMENT POST create_produit (AVANT HEADER) ---
 if ($action === 'create_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SESSION['admin_role'] === 'redacteur') {
-        die("Accès refusé.");
+    // Vérifier les permissions selon le type
+    if (!empty($_SESSION['admin_permissions']['manage_annonces'])) {
+        requirePermission($db, 'manage_annonces');
+        // Valider que le type est 'instrument'
+        if (isset($_POST['type']) && $_POST['type'] !== 'instrument') {
+            die("Accès refusé : Vous ne pouvez créer que des instruments.");
+        }
+    } else {
+        requirePermission($db, 'manage_products');
+        // Valider que le type est une partition
+        if (isset($_POST['type']) && !in_array($_POST['type'], ['partition_physique', 'partition_virtuelle'])) {
+            die("Accès refusé : Vous ne pouvez créer que des partitions.");
+        }
     }
     
     $image_url = FileUpload::uploadImage('image', FileUpload::UPLOAD_DIR_IMG);
@@ -485,14 +476,25 @@ if ($action === 'create_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // --- TRAITEMENT POST edit_produit (AVANT HEADER) ---
 if ($action === 'edit_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SESSION['admin_role'] === 'redacteur') {
-        die("Accès refusé.");
+    // Vérifier les permissions selon le type
+    if (!empty($_SESSION['admin_permissions']['manage_annonces'])) {
+        requirePermission($db, 'manage_annonces');
+        // Valider que le type est 'instrument'
+        if (isset($_POST['type']) && $_POST['type'] !== 'instrument') {
+            die("Accès refusé : Vous ne pouvez modifier que des instruments.");
+        }
+    } else {
+        requirePermission($db, 'manage_products');
+        // Valider que le type est une partition
+        if (isset($_POST['type']) && !in_array($_POST['type'], ['partition_physique', 'partition_virtuelle'])) {
+            die("Accès refusé : Vous ne pouvez modifier que des partitions.");
+        }
     }
     
     $produitModel = new Produit($db);
     $id = $produitModel->getIdFromPost();
     
-    if ($_SESSION['admin_role'] === 'musicien') {
+    if (isRestrictedToOwn('produits')) {
         $existingProduct = $produitModel->getProductById($id);
         if ($existingProduct['seller_id'] != $_SESSION['admin_id']) {
             die("Accès refusé : Vous ne pouvez modifier que vos propres produits.");
@@ -521,9 +523,7 @@ if ($action === 'edit_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // US-27 : EXPORT CSV (AVANT HEADER)
 // ==========================================
 if ($action === 'export_csv') {
-    if ($_SESSION['admin_role'] !== 'admin') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'export_data');
     
     $type = isset($_GET['type']) ? $_GET['type'] : 'orders';
     $date_start = isset($_GET['date_start']) ? $_GET['date_start'] : date('Y-m-01');
@@ -574,9 +574,7 @@ if ($action === 'moderation') {
 // US-27 : EXPORT PDF (AVANT HEADER)
 // ==========================================
 if ($action === 'export_pdf') {
-    if ($_SESSION['admin_role'] !== 'admin') {
-        die("Accès refusé.");
-    }
+    requirePermission($db, 'view_reports');
     
     $date_start = isset($_GET['date_start']) ? $_GET['date_start'] : date('Y-m-01');
     $date_end = isset($_GET['date_end']) ? $_GET['date_end'] : date('Y-m-d');
@@ -655,7 +653,8 @@ $twigVars = [
     'is_admin' => true,
     'admin_role' => $_SESSION['admin_role'],
     'admin_name' => $_SESSION['admin_name'],
-    'admin_id' => $_SESSION['admin_id']
+    'admin_id' => $_SESSION['admin_id'],
+    'admin_permissions' => getPermissionsForTwig($db)  // Permissions pour les templates
 ];
 
 // ===========================================
@@ -673,8 +672,8 @@ switch ($action) {
 
         $produitModel = new Produit($db);
         
-        // US-33 : Affichage du CA pour les Musiciens Professionnels
-        if ($_SESSION['admin_role'] === 'musicien') {
+        // US-33 : Affichage du CA pour les rôles restreints aux produits (ex: Musicien)
+        if (isRestrictedToOwn('produits')) {
             // On compte seulement ses produits
             $allProducts = $produitModel->getProducts();
             $myProducts = array_filter($allProducts, function($p) {
@@ -701,9 +700,7 @@ switch ($action) {
 
     // --- GESTION DES ARTICLES (US-06) ---
     case 'articles':
-        if ($_SESSION['admin_role'] === 'musicien') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_articles');
         $articleModel = new Article($db);
         // Admin voit tout (status = 'all')
         $liste_articles = $articleModel->getArticles(null, 'all');
@@ -738,8 +735,8 @@ switch ($action) {
         if (isset($_GET['id'])) {
             $article = $articleModel->getArticleById($_GET['id']);
             
-            // Vérification des droits
-            if ($_SESSION['admin_role'] === 'redacteur' && $article['author_id'] != $_SESSION['admin_id']) {
+            // Vérification des droits (utilise règle centralisée pour les rôles restreints)
+            if (isRestrictedToOwn('articles') && $article['author_id'] != $_SESSION['admin_id']) {
                 die("Accès refusé : Vous ne pouvez modifier que vos propres articles.");
             }
 
@@ -761,13 +758,28 @@ switch ($action) {
         break;
 
     case 'produits':
-        if ($_SESSION['admin_role'] === 'redacteur') {
-            die("Accès refusé.");
+        // Choix de permission selon la matrice en session (manage_annonces prioritaire)
+        if (!empty($_SESSION['admin_permissions']['manage_annonces'])) {
+            requirePermission($db, 'manage_annonces');
+        } else {
+            requirePermission($db, 'manage_products');
         }
         $produitModel = new Produit($db);
-        $liste_produits = $produitModel->getProducts();
-        // Filtrer pour le musicien
-        if ($_SESSION['admin_role'] === 'musicien') {
+        // Si l'user a manage_annonces : voir seulement les instruments pending
+        if (!empty($_SESSION['admin_permissions']['manage_annonces'])) {
+            $allPending = $produitModel->getProductsByStatus('pending');
+            $liste_produits = array_filter($allPending, function($p) {
+                return $p['type'] === 'instrument';
+            });
+        } else {
+            // manage_products voit seulement les partitions
+            $allProducts = $produitModel->getProducts();
+            $liste_produits = array_filter($allProducts, function($p) {
+                return in_array($p['type'], ['partition_physique', 'partition_virtuelle']);
+            });
+        }
+        // Filtrer pour les rôles restreints (ex: musicien)
+        if (isRestrictedToOwn('produits')) {
             $liste_produits = array_filter($liste_produits, function($p) {
                 return $p['seller_id'] == $_SESSION['admin_id'];
             });
@@ -779,9 +791,7 @@ switch ($action) {
         break;
 
     case 'create_produit':
-        if ($_SESSION['admin_role'] === 'redacteur') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_products');
         // Le traitement POST est fait avant le header
         $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -797,16 +807,14 @@ switch ($action) {
         break;
 
     case 'edit_produit':
-        if ($_SESSION['admin_role'] === 'redacteur') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_products');
         $produitModel = new Produit($db);
         // Le traitement POST est fait avant le header
         if (isset($_GET['id'])) {
             $produit = $produitModel->getProductById($_GET['id']);
             
-            // Vérification Musicien
-            if ($_SESSION['admin_role'] === 'musicien' && $produit['seller_id'] != $_SESSION['admin_id']) {
+            // Vérification pour rôles restreints aux produits (ex: musicien)
+            if (isRestrictedToOwn('produits') && $produit['seller_id'] != $_SESSION['admin_id']) {
                 die("Accès refusé : Vous ne pouvez modifier que vos propres produits.");
             }
 
@@ -822,9 +830,7 @@ switch ($action) {
 
     // --- CONFIGURATIONS (US-09) ---
     case 'configurations':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_configurations');
         $configModel = new Configuration($db);
         $success = null;
         
@@ -845,9 +851,7 @@ switch ($action) {
 
     // --- COMMANDES (US-08) ---
     case 'orders':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_orders');
         $orderModel = new Order($db);
         $orders = $orderModel->getAllOrders();
         echo render_template($twig, 'admin/orders/list.twig', array_merge($twigVars, [
@@ -858,9 +862,7 @@ switch ($action) {
 
     // --- GESTION DES TAGS (US-28) ---
     case 'tags':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users'); // Tags = admin seulement
         $tagModel = new Tag($db);
         
         // Ajout
@@ -878,9 +880,7 @@ switch ($action) {
 
     // --- GESTION UTILISATEURS (US-26) ---
     case 'users':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users');
         $userModel = new User($db);
         $users = $userModel->getAllUsers();
         echo render_template($twig, 'admin/users/list.twig', array_merge($twigVars, [
@@ -890,9 +890,7 @@ switch ($action) {
         break;
 
     case 'edit_user':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users');
         $userModel = new User($db);
         $error = null;
         
@@ -916,9 +914,7 @@ switch ($action) {
 
     // --- GESTION DES COURS (CRUD) ---
     case 'cours':
-        if ($_SESSION['admin_role'] === 'musicien') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_courses');
         $coursModel = new Cours($db);
         $liste_cours = $coursModel->getCourses();
         echo render_template($twig, 'admin/cours/list.twig', array_merge($twigVars, [
@@ -928,9 +924,7 @@ switch ($action) {
         break;
 
     case 'create_cours':
-        if ($_SESSION['admin_role'] === 'musicien') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_courses');
         // Le traitement POST est fait avant le header
         $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -946,9 +940,7 @@ switch ($action) {
         break;
 
     case 'edit_cours':
-        if ($_SESSION['admin_role'] === 'musicien') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_courses');
         $coursModel = new Cours($db);
         // Le traitement POST est fait avant le header
         if (isset($_GET['id'])) {
@@ -965,14 +957,12 @@ switch ($action) {
 
     // --- GESTION DES COMMENTAIRES (US-24) ---
     case 'comments':
-        if ($_SESSION['admin_role'] === 'musicien') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'moderate_content');
         $commentaireModel = new Commentaire($db);
         $filter = isset($_GET['filter']) ? $_GET['filter'] : 'pending';
         
-        // Rédacteur : seulement les commentaires sur ses articles
-        if ($_SESSION['admin_role'] === 'redacteur') {
+        // Si rôle restreint aux articles : ne récupérer que les commentaires sur ses articles
+        if (isRestrictedToOwn('articles')) {
             $allComments = $commentaireModel->getCommentsByArticleAuthor($_SESSION['admin_id']);
         } else {
             $allComments = $commentaireModel->getAllComments();
@@ -996,9 +986,7 @@ switch ($action) {
 
     // --- NOTIFICATIONS (US-29) ---
     case 'notifications':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users'); // Notifications = admin
         $notificationModel = new Notification($db);
         $notifications = $notificationModel->getByUser($_SESSION['admin_id']);
         echo render_template($twig, 'admin/notifications/list.twig', array_merge($twigVars, [
@@ -1011,9 +999,7 @@ switch ($action) {
     // US-39 : GESTION DES DEMANDES DE RÔLE
     // ==========================================
     case 'role_requests':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users');
         $roleRequestModel = new RoleRequest($db);
         $pendingRequests = $roleRequestModel->getPendingRequests();
         $allRequests = $roleRequestModel->getAllRequests();
@@ -1028,9 +1014,7 @@ switch ($action) {
     // GESTION DES DEMANDES DE MODÉRATION PRODUITS
     // ==========================================
     case 'moderation_requests':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'moderate_content');
         $mreqModel = new ModerationRequest($db);
         $pendingMreqs = $mreqModel->getPendingRequests();
         $allMreqs = $mreqModel->getAllRequests();
@@ -1045,9 +1029,7 @@ switch ($action) {
     // US-30 : GESTION DES PERMISSIONS
     // ==========================================
     case 'permissions':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'manage_users'); // Permissions = admin
         $permissionModel = new Permission($db);
         $success = null;
         
@@ -1068,9 +1050,7 @@ switch ($action) {
     // US-27 : RAPPORTS ET STATISTIQUES
     // ==========================================
     case 'reports':
-        if ($_SESSION['admin_role'] !== 'admin') {
-            die("Accès refusé.");
-        }
+        requirePermission($db, 'view_reports');
         
         // Récupération des filtres de date
         $date_start = isset($_GET['date_start']) ? $_GET['date_start'] : date('Y-m-01');

@@ -13,7 +13,7 @@
  */
 class Database {
     private $host = "localhost";
-    private $db_name = "sae301_musique_SOARES_Daniels"; 
+    private $db_name = "soares_sae301"; 
     private $username = "root";
     private $password = ""; 
     public $conn;

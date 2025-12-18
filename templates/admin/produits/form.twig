@@ -44,9 +44,12 @@
     <div class="form-group">
         <label for="type">Type</label>
         <select id="type" name="type" required>
-            <option value="partition_physique" {{ (produit is defined and produit.type == 'partition_physique') ? 'selected' : '' }}>Partition Physique</option>
-            <option value="partition_virtuelle" {{ (produit is defined and produit.type == 'partition_virtuelle') ? 'selected' : '' }}>Partition Virtuelle (PDF)</option>
-            <option value="instrument" {{ (produit is defined and produit.type == 'instrument') ? 'selected' : '' }}>Instrument</option>
+            {% if admin_permissions.manage_annonces %}
+                <option value="instrument" {{ (produit is defined and produit.type == 'instrument') ? 'selected' : '' }}>Instrument</option>
+            {% else %}
+                <option value="partition_physique" {{ (produit is defined and produit.type == 'partition_physique') ? 'selected' : '' }}>Partition Physique</option>
+                <option value="partition_virtuelle" {{ (produit is defined and produit.type == 'partition_virtuelle') ? 'selected' : '' }}>Partition Virtuelle (PDF)</option>
+            {% endif %}
         </select>
     </div>
 

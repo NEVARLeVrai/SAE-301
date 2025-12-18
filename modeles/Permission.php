@@ -53,7 +53,7 @@ class Permission {
         $stmt->execute();
         $permissions = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $roles = ['admin', 'redacteur', 'musicien'];
+        $roles = ['admin', 'redacteur', 'musicien', 'responsable_annonce'];
         $matrix = [];
 
         foreach ($roles as $role) {
@@ -86,7 +86,7 @@ class Permission {
      * Mettre à jour toutes les permissions d'un coup (depuis le formulaire)
      */
     public function updateFromMatrix($data) {
-        $roles = ['admin', 'redacteur', 'musicien'];
+        $roles = ['admin', 'redacteur', 'musicien', 'responsable_annonce'];
         
         // Récupérer toutes les permissions existantes
         $allPerms = $this->getAll();
@@ -129,7 +129,8 @@ class Permission {
             'manage_configurations' => 'Gérer les configurations',
             'moderate_content' => 'Modérer le contenu',
             'view_reports' => 'Voir les rapports',
-            'export_data' => 'Exporter les données'
+            'export_data' => 'Exporter les données',
+            'manage_annonces' => 'Gérer les annonces'
         ];
     }
 }

@@ -24,6 +24,9 @@
                 <p class="product-price">{{ row.price|number_format(2, ',', ' ') }} €</p>
                 <p>{{ row.description }}</p>
                 <p><small>Catégorie : {{ row.category }}</small></p>
+                {% if row.seller_name or row.seller_email %}
+                    <p class="text-muted small">Par : {{ row.seller_name|default('Vendeur') }}{% if row.seller_email %} — <a href="mailto:{{ row.seller_email }}">Contacter</a>{% endif %}</p>
+                {% endif %}
                 
                 <div class="product-actions">
                     <a href="index.php?action=produit_details&id={{ row.id }}" class="btn btn-small btn-admin">Voir détails</a>

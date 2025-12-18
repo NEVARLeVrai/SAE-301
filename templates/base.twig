@@ -57,45 +57,61 @@
                                 <i class="bi bi-collection me-1"></i> Contenu
                             </a>
                             <ul class="dropdown-menu">
-                                {% if admin_role != 'musicien' %}
+                                {% if admin_permissions.manage_articles %}
                                     <li><a class="dropdown-item" href="index.php?action=articles"><i class="bi bi-file-text me-1"></i> Articles</a></li>
-                                    {% if admin_role == 'admin' %}
-                                        <li><a class="dropdown-item" href="index.php?action=cours"><i class="bi bi-music-note-list me-1"></i> Cours</a></li>
-                                    {% endif %}
+                                {% endif %}
+                                {% if admin_permissions.manage_courses %}
+                                    <li><a class="dropdown-item" href="index.php?action=cours"><i class="bi bi-music-note-list me-1"></i> Cours</a></li>
+                                {% endif %}
+                                {% if admin_permissions.moderate_content %}
                                     <li><a class="dropdown-item" href="index.php?action=comments"><i class="bi bi-chat-left-text me-1"></i> Commentaires</a></li>
                                 {% endif %}
-                                {% if admin_role != 'redacteur' %}
+                                {% if admin_permissions.manage_products or admin_permissions.manage_annonces %}
                                     <li><a class="dropdown-item" href="index.php?action=produits"><i class="bi bi-bag me-1"></i> Produits</a></li>
                                 {% endif %}
-                                {% if admin_role == 'admin' %}
+                                {% if admin_permissions.manage_users %}
                                     <li><a class="dropdown-item" href="index.php?action=tags"><i class="bi bi-tags me-1"></i> Tags</a></li>
                                 {% endif %}
                             </ul>
                         </li>
 
-                        {% if admin_role == 'admin' %}
+                        {% if admin_permissions.manage_users %}
                             {# Dropdown Administration #}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-gear me-1"></i> Administration
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="index.php?action=orders"><i class="bi bi-receipt me-1"></i> Commandes</a></li>
-                                    <li><a class="dropdown-item" href="index.php?action=users"><i class="bi bi-people me-1"></i> Utilisateurs</a></li>
-                                    <li><a class="dropdown-item" href="index.php?action=role_requests"><i class="bi bi-person-badge me-1"></i> Demandes de rôle</a></li>
-                                    <li><a class="dropdown-item" href="index.php?action=moderation_requests"><i class="bi bi-exclamation-triangle me-1"></i> Modération produits</a></li>
+                                    {% if admin_permissions.manage_orders %}
+                                        <li><a class="dropdown-item" href="index.php?action=orders"><i class="bi bi-receipt me-1"></i> Commandes</a></li>
+                                    {% endif %}
+                                    {% if admin_permissions.manage_users %}
+                                        <li><a class="dropdown-item" href="index.php?action=users"><i class="bi bi-people me-1"></i> Utilisateurs</a></li>
+                                        <li><a class="dropdown-item" href="index.php?action=role_requests"><i class="bi bi-person-badge me-1"></i> Demandes de rôle</a></li>
+                                    {% endif %}
+                                    {% if admin_permissions.moderate_content %}
+                                        <li><a class="dropdown-item" href="index.php?action=moderation_requests"><i class="bi bi-exclamation-triangle me-1"></i> Modération produits</a></li>
+                                    {% endif %}
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="index.php?action=reports"><i class="bi bi-bar-chart me-1"></i> Rapports</a></li>
-                                    <li><a class="dropdown-item" href="index.php?action=permissions"><i class="bi bi-shield-lock me-1"></i> Permissions</a></li>
-                                    <li><a class="dropdown-item" href="index.php?action=configurations"><i class="bi bi-sliders me-1"></i> Config</a></li>
+                                    {% if admin_permissions.view_reports %}
+                                        <li><a class="dropdown-item" href="index.php?action=reports"><i class="bi bi-bar-chart me-1"></i> Rapports</a></li>
+                                    {% endif %}
+                                    {% if admin_permissions.manage_users %}
+                                        <li><a class="dropdown-item" href="index.php?action=permissions"><i class="bi bi-shield-lock me-1"></i> Permissions</a></li>
+                                    {% endif %}
+                                    {% if admin_permissions.manage_configurations %}
+                                        <li><a class="dropdown-item" href="index.php?action=configurations"><i class="bi bi-sliders me-1"></i> Config</a></li>
+                                    {% endif %}
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?action=notifications">
-                                    <i class="bi bi-bell me-1"></i> Notifs
-                                </a>
-                            </li>
-                        {% endif %}
+                            {% endif %}
+                            {% if admin_permissions.manage_users %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?action=notifications">
+                                        <i class="bi bi-bell me-1"></i> Notifs
+                                    </a>
+                                </li>
+                            {% endif %}
                         
                         <li class="nav-item">
                             <a class="nav-link logout-link" href="index.php?action=logout">
@@ -120,10 +136,14 @@
                                 <i class="bi bi-shop me-1"></i> Boutique
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?action=contact">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-envelope me-1"></i> Contact
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="index.php?action=contact"><i class="bi bi-envelope me-1"></i> Nous contacter</a></li>
+                                <li><a class="dropdown-item" href="index.php?action=contact&deposer=1"><i class="bi bi-megaphone me-1"></i> Déposer une annonce</a></li>
+                            </ul>
                         </li>
                         
                         {% if user_logged_in %}

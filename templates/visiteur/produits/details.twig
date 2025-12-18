@@ -43,6 +43,18 @@
                         </a>
                     {% endif %}
                 </div>
+
+                {% if seller %}
+                    <div class="product-seller mt-3">
+                        <h5>Vendu par</h5>
+                        <p>
+                            <strong>{{ seller.username ?? seller.username }}</strong>
+                            {% if seller.email %}
+                                — <a href="mailto:{{ seller.email }}">Contacter le vendeur</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
                 
                 {# Note moyenne #}
                 {% if moyenne_note %}

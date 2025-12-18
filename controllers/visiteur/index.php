@@ -367,6 +367,19 @@ switch ($action) {
         $produitModel = new Produit($db);
         // Affiche uniquement les produits approuvés (pas pending/rejected)
         $liste_produits = $produitModel->getApprovedProducts();
+        // Ajouter informations du vendeur pour affichage (nom + email)
+        $userModel = new User($db);
+        foreach ($liste_produits as &$p) {
+            $p['seller_name'] = null;
+            $p['seller_email'] = null;
+            if (!empty($p['seller_id'])) {
+                $seller = $userModel->getUserById($p['seller_id']);
+                if ($seller) {
+                    $p['seller_name'] = $seller['username'];
+                    $p['seller_email'] = $seller['email'];
+                }
+            }
+        }
         echo render_template($twig, 'visiteur/produits/list.twig', [
             'liste_produits' => $liste_produits,
             'breadcrumbs' => ['Boutique' => 'index.php?action=boutique']
@@ -390,9 +403,16 @@ switch ($action) {
                     $orderModel = new Order($db);
                     $user_has_bought = $orderModel->hasUserBoughtProduct($_SESSION['user_id'], $_GET['id']);
                 }
+                // Récupérer le vendeur (si présent) pour affichage/contact
+                $seller = null;
+                if (!empty($produit['seller_id'])) {
+                    $userModel = new User($db);
+                    $seller = $userModel->getUserById($produit['seller_id']);
+                }
                 
                 echo render_template($twig, 'visiteur/produits/details.twig', [
                     'produit' => $produit,
+                    'seller' => $seller,
                     'avis' => $avis,
                     'moyenne_note' => $moyenne_note,
                     'user_has_bought' => $user_has_bought,
@@ -411,7 +431,8 @@ switch ($action) {
 
     case 'contact':
         echo render_template($twig, 'visiteur/contact.twig', [
-            'breadcrumbs' => ['Contact' => 'index.php?action=contact']
+            'breadcrumbs' => ['Contact' => 'index.php?action=contact'],
+            'deposer_annonce' => isset($_GET['deposer']) && $_GET['deposer'] == 1
         ]);
         break;
 
@@ -461,12 +482,16 @@ switch ($action) {
                     $_SESSION['user_role'] = $user->getRole();
                     
                     // Redirection selon le rôle
-                    if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien'])) {
+                    if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien', 'responsable_annonce'])) {
                         // Initialisation des variables de session Admin
                         $_SESSION['admin_logged_in'] = true;
                         $_SESSION['admin_id'] = $user->getId();
                         $_SESSION['admin_name'] = $user->getUsername();
                         $_SESSION['admin_role'] = $user->getRole();
+                        // Charger en cache les permissions du rôle afin d'avoir les droits en back-office
+                        if (function_exists('loadRolePermissionsIntoSession')) {
+                            loadRolePermissionsIntoSession($db, $user->getRole());
+                        }
                         
                         header('Location: ../admin/index.php?action=dashboard');
                     } else {
@@ -512,11 +537,14 @@ switch ($action) {
                     $_SESSION['user_name'] = $user->getUsername();
                     $_SESSION['user_role'] = $user->getRole();
                     
-                    if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien'])) {
+                    if (in_array($user->getRole(), ['admin', 'redacteur', 'musicien', 'responsable_annonce'])) {
                         $_SESSION['admin_logged_in'] = true;
                         $_SESSION['admin_id'] = $user->getId();
                         $_SESSION['admin_name'] = $user->getUsername();
                         $_SESSION['admin_role'] = $user->getRole();
+                        if (function_exists('loadRolePermissionsIntoSession')) {
+                            loadRolePermissionsIntoSession($db, $user->getRole());
+                        }
                         header('Location: ../admin/index.php?action=dashboard');
                     } else {
                         header('Location: index.php?action=accueil');

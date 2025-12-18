@@ -39,6 +39,15 @@ class Produit {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Lire les produits par statut (ex: pending) - pour modération
+    public function getProductsByStatus($status) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE status = :status AND is_deleted = 0 ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Lire un produit par ID
     public function getProductById($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id LIMIT 1";

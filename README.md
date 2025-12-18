@@ -22,6 +22,7 @@ Site de partage et d'échange sur la musique proposant :
 
 ### Configuration
 1. Importer le fichier `bdd/script_creation_bdd.sql` dans phpMyAdmin
+    - Avant d'importer, vérifier que le script contient les entrées pour le rôle `visiteur` (tous `is_allowed = FALSE`) ou ajouter-les manuellement si nécessaire.
 2. Modifier les identifiants de connexion dans `modeles/Database.php` si nécessaire :
 
 ```php
@@ -48,44 +49,49 @@ Site de partage et d'échange sur la musique proposant :
 
 ## Structure du projet
 
+Voici l'arborescence telle qu'elle existe dans le dépôt :
+
 ```
-SAE 301/
-├── index.php                 # Page d'accueil (choix du rôle)
-├── README.md                 # Ce fichier
-├── composer.json             # Dépendances PHP (Twig)
+SAE-301/
+├── index.php
+├── README.md
+├── composer.json
+├── composer.lock
 ├── bdd/
 │   └── script_creation_bdd.sql
 ├── controllers/
 │   ├── admin/
-│   │   └── index.php         # Contrôleur administration
+│   │   └── index.php
 │   └── visiteur/
-│       └── index.php         # Contrôleur visiteur
+│       └── index.php
 ├── include/
-│   └── twig.php              # Configuration Twig
+│   ├── twig.php
+│   └── authorization.php
 ├── modeles/
-│   ├── Database.php          # Connexion BDD
-│   ├── Validator.php         # Validation des données (centralisée)
-│   ├── User.php              # Gestion utilisateurs
-│   ├── Article.php           # Gestion articles blog
-│   ├── Cours.php             # Gestion cours
-│   ├── Produit.php           # Gestion produits
-│   ├── Order.php             # Gestion commandes
-│   ├── Avis.php              # Gestion avis produits
-│   ├── Commentaire.php       # Gestion commentaires
-│   ├── Configuration.php     # Paramètres site
-│   ├── Tag.php               # Gestion tags articles
-│   ├── Favori.php            # Gestion favoris
-│   ├── Notification.php      # Notifications admin
-│   ├── RoleRequest.php       # Demandes de rôle (US-39)
-│   ├── ModerationRequest.php # Demandes modération produits (US-10)
-│   ├── Permission.php        # Matrice permissions (US-30)
-│   ├── Rapport.php           # Rapports et exports (US-27)
-│   └── FileUpload.php        # Gestion uploads fichiers (US-23)
-├── templates/                # Templates Twig
-│   ├── base.twig             # Layout principal (header + footer)
-│   ├── admin/                # Templates back-office
-│   │   ├── login.twig
+│   ├── Article.php
+│   ├── Avis.php
+│   ├── Commentaire.php
+│   ├── Configuration.php
+│   ├── Cours.php
+│   ├── Database.php
+│   ├── Favori.php
+│   ├── FileUpload.php
+│   ├── ModerationRequest.php
+│   ├── Notification.php
+│   ├── Order.php
+│   ├── Permission.php
+│   ├── Produit.php
+│   ├── Rapport.php
+│   ├── RoleRequest.php
+│   ├── Tag.php
+│   ├── User.php
+│   └── Validator.php
+├── templates/
+│   ├── base.twig
+│   ├── index.twig
+│   ├── admin/
 │   │   ├── dashboard.twig
+│   │   ├── login.twig
 │   │   ├── configurations.twig
 │   │   ├── articles/
 │   │   ├── cours/
@@ -99,22 +105,23 @@ SAE 301/
 │   │   ├── permissions/
 │   │   ├── role_requests/
 │   │   └── moderation_requests/
-│   └── visiteur/             # Templates front-office
+│   └── visiteur/
 │       ├── accueil.twig
 │       ├── contact.twig
 │       ├── mentions_legales.twig
 │       ├── articles/
 │       ├── cours/
-│       ├── produits/
+│       ├── produits/       # templates produits (list.twig, details.twig)
 │       ├── orders/
 │       ├── auth/
 │       └── favorites/
-├── vendor/                   # Dépendances Composer (Twig)
+├── vendor/
+├── tools/
 ├── css/
-│   └── style.css             # Styles personnalisés
-├── assets/                   # Images et fichiers uploadés
-│   └── system/               # Fichiers système (favicon, etc.)
-└── img/                      # Dossier alternatif uploads
+│   └── style.css
+├── assets/
+│   └── system/
+└── img/
 ```
 
 ---
@@ -173,6 +180,7 @@ SAE 301/
 ---
 
 ## Rôles et Permissions
+Les permissions sont stockées en base dans la table `role_permissions` et contrôlées depuis des helpers centralisés (`include/authorization.php`). Les permissions sont chargées en session (`$_SESSION['admin_permissions']`) pour optimiser l'affichage conditionnel dans les templates.
 
 ### Visiteur
 - Consultation des cours, articles, boutique
@@ -195,6 +203,8 @@ SAE 301/
 - Statistiques de ventes personnelles
 - Chiffre d'affaires
 
+> Remarque : les contrôles d'accès sont désormais fondés sur la matrice de permissions en base — évitez les checks basés sur `admin_role === '...'` dans le code.
+
 ### Administrateur
 - Accès complet à toutes les fonctionnalités
 - Gestion des utilisateurs et rôles
@@ -215,6 +225,9 @@ Le projet utilise une classe `Validator` centralisée (`modeles/Validator.php`) 
 - **Validation mot de passe** : Longueur minimale configurable (3 pour login, 6 pour inscription), max 72 caractères
 - **Validation username** : 3-50 caractères, alphanumériques + underscore uniquement
 - **Vérification doublons** : Email et username uniques en base de données
+
+- **Validation types produits** : le serveur vérifie que le type de produit soumis (partition/instrument) correspond aux permissions du rôle (ex. `manage_annonces` ne peut créer que `instrument`, `manage_products` gère les partitions).
+- **Contrôle d'appartenance** : un `musicien` ne peut modifier que ses propres produits (vérification côté serveur).
 
 ### Double vérification
 - **Côté serveur** : Validation PHP obligatoire via la classe `Validator` (sécurité principale)
