@@ -43,6 +43,7 @@ Site de partage et d'échange sur la musique proposant :
 | **Administrateur** | admin@omnimusique.com | `admin123` |
 | **Rédacteur** | redac@omnimusique.com | `redac123` |
 | **Musicien Pro** | mozart@omnimusique.com | `mozart123` |
+| **Responsable Annonce** | resp.annonce@omnimusique.com | `respannonce123` |
 | **Visiteur** | visiteur@omnimusique.com | `visiteur123` |
 
 ---
