@@ -11,6 +11,14 @@
  * Workflow : Annonce soumise -> En attente -> Approuvé/Rejeté
  * Status : pending, approved, rejected
  */
+/**
+ * Class ModerationRequest
+ *
+ * Gère les demandes de modération d'annonces produits.
+ * Fournit la création, récupération et l'approbation/rejet des demandes.
+ *
+ * @package Modeles
+ */
 class ModerationRequest {
     private $conn;
     private $table_name = "moderation_requests";

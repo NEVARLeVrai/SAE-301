@@ -10,6 +10,14 @@
  * Stockage en base de données (synchronisation).
  * L'icône change d'état (plein/vide) selon le statut.
  */
+/**
+ * Class Favori
+ *
+ * Gère les favoris des utilisateurs pour différents types d'items (article, course...).
+ * Fournit des helpers pour récupérer les détails des favoris.
+ *
+ * @package Modeles
+ */
 class Favori {
     private $conn;
     private $table_name = "favorites";
@@ -18,7 +26,14 @@ class Favori {
         $this->conn = $db;
     }
 
-    // Ajouter un favori
+    /**
+     * Ajoute un favori si non présent.
+     *
+     * @param int $user_id
+     * @param int $item_id
+     * @param string $item_type
+     * @return bool
+     */
     public function add($user_id, $item_id, $item_type) {
         // Vérifier si le favori existe déjà
         if ($this->isFavorite($user_id, $item_id, $item_type)) {
@@ -34,7 +49,14 @@ class Favori {
         return $stmt->execute();
     }
 
-    // Supprimer un favori
+    /**
+     * Supprime un favori.
+     *
+     * @param int $user_id
+     * @param int $item_id
+     * @param string $item_type
+     * @return bool
+     */
     public function remove($user_id, $item_id, $item_type) {
         $query = "DELETE FROM " . $this->table_name . " 
                   WHERE user_id = :user_id AND item_id = :item_id AND item_type = :item_type";
@@ -45,7 +67,14 @@ class Favori {
         return $stmt->execute();
     }
 
-    // Vérifier si un élément est en favori
+    /**
+     * Vérifie si un élément est en favori pour un utilisateur.
+     *
+     * @param int $user_id
+     * @param int $item_id
+     * @param string $item_type
+     * @return bool
+     */
     public function isFavorite($user_id, $item_id, $item_type) {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " 
                   WHERE user_id = :user_id AND item_id = :item_id AND item_type = :item_type";
@@ -58,7 +87,13 @@ class Favori {
         return $row['count'] > 0;
     }
 
-    // Récupérer les favoris d'un utilisateur par type
+    /**
+     * Récupère la liste des favoris d'un utilisateur, optionnellement filtrée par type.
+     *
+     * @param int $user_id
+     * @param string|null $item_type
+     * @return array
+     */
     public function getFavoritesByUser($user_id, $item_type = null) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE user_id = :user_id";
         
@@ -79,7 +114,12 @@ class Favori {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer les cours favoris avec détails
+    /**
+     * Récupère les cours favoris avec les détails associés.
+     *
+     * @param int $user_id
+     * @return array
+     */
     public function getFavoriteCoursesWithDetails($user_id) {
         $query = "SELECT c.*, f.created_at as favorited_at, u.username as author
                   FROM " . $this->table_name . " f
@@ -93,7 +133,12 @@ class Favori {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer les articles favoris avec détails
+    /**
+     * Récupère les articles favoris avec détails (filtre `is_deleted`).
+     *
+     * @param int $user_id
+     * @return array
+     */
     public function getFavoriteArticlesWithDetails($user_id) {
         $query = "SELECT a.*, f.created_at as favorited_at, u.username as author
                   FROM " . $this->table_name . " f
@@ -107,7 +152,12 @@ class Favori {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Compter les favoris d'un utilisateur
+    /**
+     * Compte le nombre de favoris d'un utilisateur.
+     *
+     * @param int $user_id
+     * @return int
+     */
     public function countByUser($user_id) {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " WHERE user_id = :user_id";
         $stmt = $this->conn->prepare($query);

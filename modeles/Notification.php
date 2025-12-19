@@ -18,7 +18,14 @@ class Notification {
         $this->conn = $db;
     }
 
-    // Créer une notification
+    /**
+     * Crée une notification pour un utilisateur donné.
+     *
+     * @param int $user_id Identifiant de l'utilisateur destinataire
+     * @param string $message Texte de la notification
+     * @param string|null $link URL associée (optionnel)
+     * @return bool Résultat de l'exécution PDO
+     */
     public function create($user_id, $message, $link = null) {
         $query = "INSERT INTO " . $this->table_name . " (user_id, message, link, is_read, created_at) 
                   VALUES (:user_id, :message, :link, 0, NOW())";
@@ -30,6 +37,13 @@ class Notification {
     }
 
     // Récupérer les notifications d'un utilisateur
+    /**
+     * Récupère les notifications d'un utilisateur.
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @param int $limit Nombre maximum de notifications retournées
+     * @return array Liste associative des notifications
+     */
     public function getByUser($user_id, $limit = 20) {
         $query = "SELECT * FROM " . $this->table_name . " 
                   WHERE user_id = :user_id 
@@ -43,6 +57,12 @@ class Notification {
     }
 
     // Récupérer toutes les notifications (pour admin global)
+    /**
+     * Récupère toutes les notifications (usage administratif).
+     *
+     * @param int $limit Nombre maximum de notifications retournées
+     * @return array Liste associative des notifications
+     */
     public function getAll($limit = 50) {
         $query = "SELECT n.*, u.username 
                   FROM " . $this->table_name . " n
@@ -56,6 +76,12 @@ class Notification {
     }
 
     // Récupérer les notifications non lues
+    /**
+     * Récupère les notifications non lues pour un utilisateur.
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @return array Liste des notifications non lues
+     */
     public function getUnreadByUser($user_id) {
         $query = "SELECT * FROM " . $this->table_name . " 
                   WHERE user_id = :user_id AND is_read = 0 
@@ -67,6 +93,12 @@ class Notification {
     }
 
     // Compter les notifications non lues
+    /**
+     * Compte les notifications non lues pour un utilisateur.
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @return int Nombre de notifications non lues
+     */
     public function countUnread($user_id) {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " 
                   WHERE user_id = :user_id AND is_read = 0";
@@ -78,6 +110,12 @@ class Notification {
     }
 
     // Marquer comme lu
+    /**
+     * Marque une notification comme lue.
+     *
+     * @param int $id Identifiant de la notification
+     * @return bool Résultat de la requête
+     */
     public function markAsRead($id) {
         $query = "UPDATE " . $this->table_name . " SET is_read = 1 WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -86,6 +124,12 @@ class Notification {
     }
 
     // Marquer toutes comme lues pour un utilisateur
+    /**
+     * Marque toutes les notifications d'un utilisateur comme lues.
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @return bool Résultat de la requête
+     */
     public function markAllAsRead($user_id) {
         $query = "UPDATE " . $this->table_name . " SET is_read = 1 WHERE user_id = :user_id";
         $stmt = $this->conn->prepare($query);
@@ -94,6 +138,12 @@ class Notification {
     }
 
     // Supprimer une notification
+    /**
+     * Supprime une notification par son identifiant.
+     *
+     * @param int $id Identifiant de la notification
+     * @return bool Résultat de la requête
+     */
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -102,6 +152,13 @@ class Notification {
     }
 
     // Notifier les admins (helper)
+    /**
+     * Helper : crée une notification pour chaque administrateur.
+     *
+     * @param string $message Message de la notification
+     * @param string|null $link Lien associé (optionnel)
+     * @return bool Toujours true (pour compatibilité)
+     */
     public function notifyAdmins($message, $link = null) {
         // Récupérer tous les admins
         $query = "SELECT id FROM users WHERE role = 'admin'";

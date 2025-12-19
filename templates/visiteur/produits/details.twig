@@ -1,3 +1,8 @@
+{#
+    TEMPLATE: templates/visiteur/produits/details.twig
+    PURPOSE: Page détail d'un produit (public)
+    VARIABLES: `produit`, `user_logged_in`, `related_products` — fournis par le contrôleur visiteur
+#}
 {% extends 'base.twig' %}
 
 {% block title %} - {{ produit.name }}{% endblock %}

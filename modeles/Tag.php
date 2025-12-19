@@ -10,6 +10,14 @@
  * Relation Many-to-Many via table article_tags.
  * Association multiple possible par article.
  */
+/**
+ * Class Tag
+ *
+ * Gestion des tags et de l'association tag <-> article via `article_tags`.
+ * Fournit des méthodes pour CRUD basique et gestion des associations.
+ *
+ * @package Modeles
+ */
 class Tag {
     private $conn;
     private $table_name = "tags";

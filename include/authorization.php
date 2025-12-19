@@ -1,10 +1,32 @@
 <?php
 /**
- * Fonctions d'autorisation centralisées
+ * Include/authorization.php
+ *
+ * Helpers centralisés pour la gestion des permissions et du cache des permissions en
+ * session. Le contrôleur appelle ces fonctions pour vérifier l'accès aux actions
+ * et charger en mémoire les permissions du rôle courant afin d'éviter des
+ * requêtes répétées.
+ *
+ * Fonctions exportées :
+ * - hasPermission(PDO $db, string $permission): bool
+ * - loadRolePermissionsIntoSession(PDO $db, string $role): array
+ * - requirePermission(PDO $db, string $permission): void (die si refus)
+ * - getPermissionsForTwig(PDO $db): array
+ * - isRestrictedToOwn(string $resource): bool
+ *
+ * Remarque : ces helpers utilisent la variable superglobale `$_SESSION`.
  */
 
 include_once __DIR__ . '/../modeles/Permission.php';
 
+/**
+ * Ensure a PHP session is started.
+ *
+ * Cette fonction est utilisée en interne par les helpers pour garantir
+ * l'existence de `$_SESSION`.
+ *
+ * @return void
+ */
 function _ensure_session_started() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -13,7 +35,11 @@ function _ensure_session_started() {
 
 /**
  * Vérifie si le rôle courant a la permission demandée.
- * Utilise le cache en session si disponible, sinon interroge la BDD.
+ * Utilise le cache en session si disponible, sinon interroge la BDD via le modèle Permission.
+ *
+ * @param PDO $db Connexion PDO
+ * @param string $permission Nom de la permission à vérifier
+ * @return bool True si autorisé
  */
 function hasPermission($db, $permission) {
     _ensure_session_started();
@@ -33,7 +59,11 @@ function hasPermission($db, $permission) {
 }
 
 /**
- * Charge les permissions du rôle en session pour éviter des requêtes répétées.
+ * Charge les permissions d'un rôle en session (`$_SESSION['admin_permissions']`).
+ *
+ * @param PDO $db
+ * @param string $role
+ * @return array Tableau associatif permission => bool
  */
 function loadRolePermissionsIntoSession($db, $role) {
     _ensure_session_started();
@@ -43,7 +73,12 @@ function loadRolePermissionsIntoSession($db, $role) {
 }
 
 /**
- * Vérifie une permission et meurt si l'utilisateur n'a pas accès (pour les contrôleurs)
+ * Vérifie une permission et renvoie une erreur fatale si l'utilisateur n'a pas accès.
+ * Utilisé par les contrôleurs pour protéger des actions sensibles.
+ *
+ * @param PDO $db
+ * @param string $permission
+ * @return void
  */
 function requirePermission($db, $permission) {
     if (!hasPermission($db, $permission)) {
@@ -52,7 +87,11 @@ function requirePermission($db, $permission) {
 }
 
 /**
- * Retourne les permissions de l'utilisateur actuel au format Twig (pour les templates)
+ * Retourne les permissions du rôle courant au format utilisable par Twig.
+ * Si l'utilisateur est `admin`, toutes les permissions sont retournées à true.
+ *
+ * @param PDO $db
+ * @return array Tableau permission => bool
  */
 function getPermissionsForTwig($db) {
     _ensure_session_started();
@@ -81,9 +120,12 @@ function getPermissionsForTwig($db) {
 }
 
 /**
- * Indique si le rôle courant est restreint à ses propres ressources
+ * Indique si le rôle courant est restreint à ses propres ressources.
  * Exemples : 'redacteur' => articles (seulement ses articles), 'musicien' => produits (ses produits)
  * Centralise les règles au même endroit pour éviter les checks dispersés dans les contrôleurs.
+ *
+ * @param string $resource Nom logique de la ressource ('articles', 'produits', ...)
+ * @return bool
  */
 function isRestrictedToOwn($resource) {
     _ensure_session_started();

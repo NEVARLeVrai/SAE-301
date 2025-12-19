@@ -10,6 +10,14 @@
  * 
  * Rôles disponibles : admin, redacteur, musicien, visiteur
  */
+/**
+ * Class User
+ *
+ * Gestion des utilisateurs : authentification, CRUD, création depuis POST et helpers.
+ * Les méthodes `createFromPost`, `updateFromPost` et `loginFromPost` lisent `$_POST`.
+ *
+ * @package Modeles
+ */
 class User {
     private $conn;
     private $table_name = "users";
@@ -21,6 +29,10 @@ class User {
     private $password;
     private $role;
 
+    /**
+     * User constructor.
+     * @param PDO $db
+     */
     public function __construct($db) {
         $this->conn = $db;
     }

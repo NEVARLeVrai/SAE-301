@@ -10,6 +10,14 @@
  * Hiérarchie par défaut : Admin > Rédacteur > Musicien > Visiteur
  * Matrice éditable permettant de personnaliser les droits.
  */
+/**
+ * Class Permission
+ *
+ * Manipulation de la matrice des permissions stockée dans `role_permissions`.
+ * Fournit des helpers pour récupérer, mettre à jour et vérifier les permissions par rôle.
+ *
+ * @package Modeles
+ */
 class Permission {
     private $conn;
     private $table_name = "role_permissions";

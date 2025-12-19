@@ -15,10 +15,25 @@
  * Types : partition_virtuelle, partition_physique, instrument
  * Status : pending, approved, rejected
  */
+/**
+ * Class Produit
+ *
+ * Gestion des produits/annonces : CRUD, modération, lecture filtrée et encapsulation
+ * des opérations depuis `$_POST`.
+ *
+ * Types: partition_virtuelle, partition_physique, instrument
+ * Status: pending, approved, rejected
+ *
+ * @package Modeles
+ */
 class Produit {
     private $conn;
     private $table_name = "products";
 
+    /**
+     * Produit constructor.
+     * @param PDO $db
+     */
     public function __construct($db) {
         $this->conn = $db;
     }

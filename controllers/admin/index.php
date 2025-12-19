@@ -52,6 +52,15 @@ $db = $database->getConnection();
 // Récupération de l'action (routage par paramètre GET)
 $action = isset($_GET['action']) ? $_GET['action'] : 'login';
 
+/**
+ * Router & Authentication
+ *
+ * $action: paramètre GET utilisé pour le routage centralisé.
+ * Les blocs suivants gèrent l'authentification (login/logout) AVANT
+ * l'accès à la zone protégée. Les traitements POST qui modifient
+ * des données sont exécutés avant l'envoi des headers pour permettre
+ * des redirections sûres sans erreurs "headers already sent".
+ */
 // ===========================================
 // AUTHENTIFICATION - Connexion au back-office
 // ===========================================
@@ -109,6 +118,10 @@ if ($action == 'login') {
     exit; // On arrête le script ici pour ne pas charger le reste
 }
 
+/**
+ * Déconnexion (logout)
+ * Détruit la session et redirige vers la page publique.
+ */
 // --- LOGIQUE DE DÉCONNEXION ---
 if ($action == 'logout') {
     session_destroy();
@@ -123,11 +136,23 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+/**
+ * Actions modifiant l'état (redirectActions)
+ *
+ * Liste des actions qui effectuent une modification puis redirigent.
+ * Elles sont traitées avant l'envoi des headers HTML afin d'autoriser
+ * les redirections sans provoquer d'erreurs "headers already sent".
+ */
 // ===========================================
 // ACTIONS AVEC REDIRECTION (traitées avant le header HTML)
 // ===========================================
 // Ces actions modifient des données et redirigent ensuite vers une page
 // Elles doivent être traitées AVANT l'envoi du header HTML
+/**
+ * Liste des actions qui effectuent une modification puis redirigent.
+ * Traitées avant l'envoi du header HTML pour éviter les erreurs "headers already sent".
+ * @var string[] $redirectActions
+ */
 $redirectActions = [
     'delete_user',           // US-26 : Suppression utilisateur
     'delete_article',        // US-36 : Suppression article (soft delete)
@@ -372,6 +397,12 @@ if ($action === 'tags' && isset($_GET['delete_id'])) {
     exit;
 }
 
+/**
+ * POST: edit_user
+ * - Vérifie la permission 'manage_users'
+ * - Délègue la mise à jour à `User::updateFromPost`
+ * - Redirige vers la liste des utilisateurs en cas de succès
+ */
 // --- TRAITEMENT POST edit_user (AVANT HEADER) ---
 if ($action === 'edit_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     requirePermission($db, 'manage_users');
@@ -382,6 +413,11 @@ if ($action === 'edit_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: create_cours
+ * - Vérifier permission 'manage_courses'
+ * - Créer le cours via `Cours::createFromPost`
+ */
 // --- TRAITEMENT POST create_cours (AVANT HEADER) ---
 if ($action === 'create_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     requirePermission($db, 'manage_courses');
@@ -392,6 +428,11 @@ if ($action === 'create_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: edit_cours
+ * - Vérifier permission 'manage_courses'
+ * - Déléguer la mise à jour à `Cours::updateFromPost`
+ */
 // --- TRAITEMENT POST edit_cours (AVANT HEADER) ---
 if ($action === 'edit_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     requirePermission($db, 'manage_courses');
@@ -402,6 +443,12 @@ if ($action === 'edit_cours' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: create_article
+ * - Upload de l'image via `FileUpload::uploadImage`
+ * - Appel à `Article::createFromPost` (encapsulation des données)
+ * - Gestion des tags après insertion
+ */
 // --- TRAITEMENT POST create_article (AVANT HEADER) ---
 if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $image_url = FileUpload::uploadImage('image', FileUpload::UPLOAD_DIR_IMG);
@@ -418,6 +465,12 @@ if ($action === 'create_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: edit_article
+ * - Vérifie les droits (isRestrictedToOwn)
+ * - Upload/ conservation des images via `FileUpload`
+ * - Mise à jour via `Article::updateFromPost`
+ */
 // --- TRAITEMENT POST edit_article (AVANT HEADER) ---
 if ($action === 'edit_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $articleModel = new Article($db);
@@ -447,6 +500,12 @@ if ($action === 'edit_article' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: create_produit
+ * - Vérifie la permission adaptée (manage_annonces ou manage_products)
+ * - Upload image + fichier via `FileUpload`
+ * - Crée le produit via `Produit::createFromPost`
+ */
 // --- TRAITEMENT POST create_produit (AVANT HEADER) ---
 if ($action === 'create_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Vérifier les permissions selon le type
@@ -474,6 +533,12 @@ if ($action === 'create_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * POST: edit_produit
+ * - Vérifie la permission adaptée
+ * - Gère la logique "isRestrictedToOwn" pour limiter aux propres produits
+ * - Uploads gérés via `FileUpload` avec fallback sur valeurs courantes
+ */
 // --- TRAITEMENT POST edit_produit (AVANT HEADER) ---
 if ($action === 'edit_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Vérifier les permissions selon le type
@@ -519,6 +584,12 @@ if ($action === 'edit_produit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/**
+ * EXPORT CSV
+ * - Vérifie la permission 'export_data'
+ * - Utilise le modèle `Rapport` pour récupérer les données
+ * - Envoie des headers CSV et écrit dans php://output
+ */
 // ==========================================
 // US-27 : EXPORT CSV (AVANT HEADER)
 // ==========================================
@@ -570,6 +641,12 @@ if ($action === 'moderation') {
     exit;
 }
 
+/**
+ * EXPORT PDF (HTML imprimable)
+ * - Vérifie permission 'view_reports'
+ * - Récupère stats et détail via `Rapport`
+ * - Génère un HTML minimal prêt pour impression / export PDF
+ */
 // ==========================================
 // US-27 : EXPORT PDF (AVANT HEADER)
 // ==========================================
@@ -647,6 +724,10 @@ if ($action === 'export_pdf') {
     exit;
 }
 
+/**
+ * Zone protégée - variables Twig communes
+ * Ces variables sont exposées aux templates d'administration.
+ */
 // --- ZONE PROTÉGÉE ---
 // Variables communes pour Twig
 $twigVars = [
@@ -657,12 +738,24 @@ $twigVars = [
     'admin_permissions' => getPermissionsForTwig($db)  // Permissions pour les templates
 ];
 
+/**
+ * ROUTAGE PRINCIPAL
+ *
+ * Le switch gère l'affichage côté back-office. Chaque case :
+ * - vérifie les permissions nécessaires via `requirePermission`
+ * - récupère les données via les modèles
+ * - rend la vue Twig correspondante via `render_template`
+ */
 // ===========================================
 // ROUTAGE PRINCIPAL - Rendu avec Twig
 // ===========================================
 switch ($action) {
-    // US-08 : Dashboard avec supervision globale
-    // US-33 : Stats de ventes pour les Musiciens
+    /**
+     * Page: Dashboard
+     * Description: Supervision globale (US-08) et statistiques ventes (US-33).
+     * Template: admin/dashboard.twig
+     * Variables fournis: `nbArticles`, `nbCours`, `nbProduits`, `caTotal`.
+     */
     case 'dashboard':
         $articleModel = new Article($db);
         $nbArticles = $articleModel->count();
@@ -698,7 +791,12 @@ switch ($action) {
         ]));
         break;
 
-    // --- GESTION DES ARTICLES (US-06) ---
+    /**
+     * Page: Liste des articles (US-06)
+     * Permission: `manage_articles`
+     * Template: admin/articles/list.twig
+     * Variables fournis: `liste_articles`.
+     */
     case 'articles':
         requirePermission($db, 'manage_articles');
         $articleModel = new Article($db);
@@ -710,6 +808,11 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Créer un article
+     * POST: traité avant header via `Article::createFromPost`
+     * Template: admin/articles/form.twig
+     */
     case 'create_article':
         // Le traitement POST est fait avant le header
         $error = null;
@@ -729,6 +832,12 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Modifier un article
+     * GET: récupère l'article et ses tags
+     * POST: traité avant header via `Article::updateFromPost`
+     * Template: admin/articles/form.twig
+     */
     case 'edit_article':
         $articleModel = new Article($db);
         // Le traitement POST est fait avant le header
@@ -757,6 +866,12 @@ switch ($action) {
         }
         break;
 
+    /**
+     * Page: Liste des produits
+     * Permission: `manage_products` ou `manage_annonces`
+     * Filtrage: respecte `isRestrictedToOwn` si actif
+     * Template: admin/produits/list.twig
+     */
     case 'produits':
         // Choix de permission selon la matrice en session (manage_annonces prioritaire)
         if (!empty($_SESSION['admin_permissions']['manage_annonces'])) {
@@ -790,6 +905,11 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Créer un produit
+     * POST: traité avant header via `Produit::createFromPost`
+     * Template: admin/produits/form.twig
+     */
     case 'create_produit':
         requirePermission($db, 'manage_products');
         // Le traitement POST est fait avant le header
@@ -806,6 +926,11 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Modifier un produit
+     * Vérifie `isRestrictedToOwn` pour rôles restreints
+     * Template: admin/produits/form.twig
+     */
     case 'edit_produit':
         requirePermission($db, 'manage_products');
         $produitModel = new Produit($db);
@@ -828,7 +953,12 @@ switch ($action) {
         }
         break;
 
-    // --- CONFIGURATIONS (US-09) ---
+    /**
+     * Page: Configurations (US-09)
+     * Permission: `manage_configurations`
+     * POST: met à jour via `Configuration::update`
+     * Template: admin/configurations.twig
+     */
     case 'configurations':
         requirePermission($db, 'manage_configurations');
         $configModel = new Configuration($db);
@@ -849,7 +979,11 @@ switch ($action) {
         ]));
         break;
 
-    // --- COMMANDES (US-08) ---
+    /**
+     * Page: Commandes (US-08)
+     * Permission: `manage_orders`
+     * Template: admin/orders/list.twig
+     */
     case 'orders':
         requirePermission($db, 'manage_orders');
         $orderModel = new Order($db);
@@ -860,7 +994,12 @@ switch ($action) {
         ]));
         break;
 
-    // --- GESTION DES TAGS (US-28) ---
+    /**
+     * Page: Tags (US-28)
+     * Permission: `manage_users` (admin)
+     * POST: createFromPost
+     * Template: admin/tags/list.twig
+     */
     case 'tags':
         requirePermission($db, 'manage_users'); // Tags = admin seulement
         $tagModel = new Tag($db);
@@ -878,7 +1017,11 @@ switch ($action) {
         ]));
         break;
 
-    // --- GESTION UTILISATEURS (US-26) ---
+    /**
+     * Page: Utilisateurs (US-26)
+     * Permission: `manage_users`
+     * Template: admin/users/list.twig
+     */
     case 'users':
         requirePermission($db, 'manage_users');
         $userModel = new User($db);
@@ -889,6 +1032,11 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Modifier utilisateur
+     * POST: updateFromPost (traité avant header)
+     * Template: admin/users/form.twig
+     */
     case 'edit_user':
         requirePermission($db, 'manage_users');
         $userModel = new User($db);
@@ -912,7 +1060,11 @@ switch ($action) {
         }
         break;
 
-    // --- GESTION DES COURS (CRUD) ---
+    /**
+     * Page: Cours (CRUD)
+     * Permission: `manage_courses`
+     * Template: admin/cours/list.twig
+     */
     case 'cours':
         requirePermission($db, 'manage_courses');
         $coursModel = new Cours($db);
@@ -923,6 +1075,11 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Créer un cours
+     * POST: createFromPost via `Cours`
+     * Template: admin/cours/form.twig
+     */
     case 'create_cours':
         requirePermission($db, 'manage_courses');
         // Le traitement POST est fait avant le header
@@ -939,6 +1096,10 @@ switch ($action) {
         ]));
         break;
 
+    /**
+     * Page: Modifier un cours
+     * Template: admin/cours/form.twig
+     */
     case 'edit_cours':
         requirePermission($db, 'manage_courses');
         $coursModel = new Cours($db);
@@ -955,7 +1116,12 @@ switch ($action) {
         }
         break;
 
-    // --- GESTION DES COMMENTAIRES (US-24) ---
+    /**
+     * Page: Commentaires (US-24)
+     * Permission: `moderate_content`
+     * Filtrage: respect `isRestrictedToOwn('articles')`
+     * Template: admin/comments/list.twig
+     */
     case 'comments':
         requirePermission($db, 'moderate_content');
         $commentaireModel = new Commentaire($db);
@@ -984,7 +1150,11 @@ switch ($action) {
         ]));
         break;
 
-    // --- NOTIFICATIONS (US-29) ---
+    /**
+     * Page: Notifications (US-29)
+     * Permission: `manage_users` (admin)
+     * Template: admin/notifications/list.twig
+     */
     case 'notifications':
         requirePermission($db, 'manage_users'); // Notifications = admin
         $notificationModel = new Notification($db);
@@ -998,6 +1168,11 @@ switch ($action) {
     // ==========================================
     // US-39 : GESTION DES DEMANDES DE RÔLE
     // ==========================================
+    /**
+     * Page: Demandes de rôle (US-39)
+     * Permission: `manage_users`
+     * Template: admin/role_requests/list.twig
+     */
     case 'role_requests':
         requirePermission($db, 'manage_users');
         $roleRequestModel = new RoleRequest($db);
@@ -1013,6 +1188,11 @@ switch ($action) {
     // ==========================================
     // GESTION DES DEMANDES DE MODÉRATION PRODUITS
     // ==========================================
+    /**
+     * Page: Demandes de modération (produits)
+     * Permission: `moderate_content`
+     * Template: admin/moderation_requests/list.twig
+     */
     case 'moderation_requests':
         requirePermission($db, 'moderate_content');
         $mreqModel = new ModerationRequest($db);
@@ -1025,9 +1205,12 @@ switch ($action) {
         ]));
         break;
 
-    // ==========================================
-    // US-30 : GESTION DES PERMISSIONS
-    // ==========================================
+    /**
+     * Page: Permissions (US-30)
+     * Permission: `manage_users`
+     * POST: updateFromMatrix
+     * Template: admin/permissions/list.twig
+     */
     case 'permissions':
         requirePermission($db, 'manage_users'); // Permissions = admin
         $permissionModel = new Permission($db);
@@ -1046,9 +1229,11 @@ switch ($action) {
         ]));
         break;
 
-    // ==========================================
-    // US-27 : RAPPORTS ET STATISTIQUES
-    // ==========================================
+    /**
+     * Page: Rapports & statistiques (US-27)
+     * Permission: `view_reports`
+     * Template: admin/reports/index.twig
+     */
     case 'reports':
         requirePermission($db, 'view_reports');
         

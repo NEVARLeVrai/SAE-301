@@ -28,6 +28,23 @@ USE soares_sae301;
 -- ===========================================
 
 -- ===========================================
+-- NOTES POUR DÉVELOPPEURS
+-- - Ce script crée les tables nécessaires pour l'application OmniMusique.
+-- - Pour garantir l'utilisation des transactions et des verrous row-level
+--   (ex: `SELECT ... FOR UPDATE` dans `Order::create()`), assurez-vous
+--   que les tables utilisent le moteur InnoDB. Certaines tables précisent
+--   déjà ENGINE=InnoDB mais vous pouvez forcer InnoDB globalement si besoin.
+-- - Les mots de passe des utilisateurs fournis ci-dessous sont hachés
+--   (Bcrypt) : utilisez `tools/hash_password.php` pour générer de nouveaux
+--   hashes si vous changez les mots de passe de test.
+-- - La table `role_permissions` contient la matrice des permissions et
+--   est utilisée par `include/authorization.php` pour charger les droits en session.
+-- - Conseils de sécurité : stocker les fichiers sensibles (PDF/MP3) hors du
+--   webroot et servir les téléchargements via un contrôleur qui vérifie
+--   les permissions et la propriété avant d'appeler `readfile()`.
+-- ===========================================
+
+-- ===========================================
 -- TABLE USERS - Gestion des utilisateurs
 -- US-26 : CRUD utilisateurs (Admin)
 -- Rôles : admin, redacteur, musicien, visiteur

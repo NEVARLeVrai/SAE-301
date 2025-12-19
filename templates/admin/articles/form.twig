@@ -1,3 +1,8 @@
+{#
+    TEMPLATE: templates/admin/articles/form.twig
+    PURPOSE: Formulaire de création / édition d'article
+    VARIABLES: `article` (optionnel), `allTags`, `articleTagIds`, `error` — fournis par le contrôleur admin
+#}
 {% extends "base.twig" %}
 
 {% block title %} - {{ article is defined ? 'Modifier l\'article' : 'Nouvel Article' }}{% endblock %}

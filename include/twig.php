@@ -17,9 +17,11 @@ use Twig\TwigFunction;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
- * Initialise le moteur de template Twig
- * 
- * @param string $templatePath Chemin vers le dossier des templates (relatif à la racine du projet)
+ * Initialise le moteur de template Twig.
+ * Note : les contrôleurs doivent démarrer la session (`session_start()`) si
+ * ils utilisent des fonctions Twig dépendant de `$_SESSION`.
+ *
+ * @param string|null $templatePath Chemin vers le dossier des templates (optionnel)
  * @return Environment Instance Twig configurée
  */
 function init_twig($templatePath = null) {
@@ -43,8 +45,8 @@ function init_twig($templatePath = null) {
     $twig->addExtension(new DebugExtension());
     
     // Ajout de fonctions personnalisées utiles
-    
-    // Fonction pour générer le chemin de base
+
+    // Fonction pour générer le chemin de base (utiliser `asset('chemin')` dans Twig)
     $twig->addFunction(new TwigFunction('asset', function ($path) {
         return '../../assets/' . $path;
     }));
@@ -78,11 +80,13 @@ function init_twig($templatePath = null) {
 }
 
 /**
- * Rendu d'un template avec les variables de session globales
- * 
+ * Rendu d'un template avec les variables de session globales.
+ * Les variables globales fournies simplifient l'accès aux informations de session
+ * dans les templates (identifiants utilisateur, rôle, etc.).
+ *
  * @param Environment $twig Instance Twig
  * @param string $template Nom du fichier template
- * @param array $variables Variables à passer au template
+ * @param array $variables Variables supplémentaires à passer au template
  * @return string HTML rendu
  */
 function render_template($twig, $template, $variables = []) {
@@ -103,6 +107,6 @@ function render_template($twig, $template, $variables = []) {
     
     // Fusion des variables globales et des variables spécifiques
     $allVariables = array_merge($globalVars, $variables);
-    
+
     return $twig->render($template, $allVariables);
 }

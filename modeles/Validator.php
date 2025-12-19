@@ -7,11 +7,25 @@
  * Centralise toutes les validations pour éviter la duplication
  * et assurer la cohérence dans toute l'application
  */
+/**
+ * Class Validator
+ *
+ * Centralise les règles de validation côté serveur pour les formulaires.
+ * Fournit des helpers pour valider email, username, password, et opérations liées.
+ *
+ * @package Modeles
+ */
 class Validator {
+    /** @var array Liste des messages d'erreur collectés */
     private $errors = [];
     
     /**
-     * Valider un email
+     * Valide une adresse email.
+     *
+     * @param string $email
+     * @param string $fieldName Nom du champ (info pour messages)
+     * @param bool $required
+     * @return bool
      */
     public function validateEmail($email, $fieldName = 'email', $required = true) {
         $email = trim($email);
@@ -37,7 +51,13 @@ class Validator {
     }
     
     /**
-     * Valider un mot de passe
+     * Valide la longueur et l'existence du mot de passe.
+     *
+     * @param string $password
+     * @param string $fieldName
+     * @param int $minLength
+     * @param bool $required
+     * @return bool
      */
     public function validatePassword($password, $fieldName = 'password', $minLength = 6, $required = true) {
         if ($required && empty($password)) {
@@ -61,7 +81,12 @@ class Validator {
     }
     
     /**
-     * Valider un nom d'utilisateur
+     * Valide un nom d'utilisateur (longueur, caractères autorisés).
+     *
+     * @param string $username
+     * @param string $fieldName
+     * @param bool $required
+     * @return bool
      */
     public function validateUsername($username, $fieldName = 'username', $required = true) {
         $username = trim($username);
@@ -92,7 +117,11 @@ class Validator {
     }
     
     /**
-     * Valider les données de login
+     * Valide les données de connexion (email + mot de passe).
+     *
+     * @param string $email
+     * @param string $password
+     * @return bool
      */
     public function validateLogin($email, $password) {
         $this->errors = [];
@@ -105,7 +134,12 @@ class Validator {
     }
     
     /**
-     * Valider les données d'inscription
+     * Valide les données d'inscription (username, email, password).
+     *
+     * @param string $username
+     * @param string $email
+     * @param string $password
+     * @return bool
      */
     public function validateRegister($username, $email, $password) {
         $this->errors = [];
@@ -119,7 +153,12 @@ class Validator {
     }
     
     /**
-     * Vérifier si un email existe déjà dans la base de données
+     * Vérifie l'existence d'un email en base.
+     *
+     * @param PDO $db
+     * @param string $email
+     * @param int|null $excludeUserId
+     * @return bool
      */
     public function emailExists($db, $email, $excludeUserId = null) {
         $query = "SELECT id FROM users WHERE email = :email";
@@ -139,7 +178,12 @@ class Validator {
     }
     
     /**
-     * Vérifier si un username existe déjà dans la base de données
+     * Vérifie l'existence d'un nom d'utilisateur en base.
+     *
+     * @param PDO $db
+     * @param string $username
+     * @param int|null $excludeUserId
+     * @return bool
      */
     public function usernameExists($db, $username, $excludeUserId = null) {
         $query = "SELECT id FROM users WHERE username = :username";
@@ -159,28 +203,36 @@ class Validator {
     }
     
     /**
-     * Récupérer les erreurs
+     * Retourne la liste des erreurs collectées.
+     *
+     * @return array
      */
     public function getErrors() {
         return $this->errors;
     }
     
     /**
-     * Récupérer les erreurs sous forme de chaîne
+     * Retourne les erreurs sous forme de chaîne concaténée.
+     *
+     * @return string
      */
     public function getErrorsString() {
         return implode(' ', $this->errors);
     }
     
     /**
-     * Vérifier s'il y a des erreurs
+     * Indique si des erreurs ont été collectées.
+     *
+     * @return bool
      */
     public function hasErrors() {
         return !empty($this->errors);
     }
     
     /**
-     * Réinitialiser les erreurs
+     * Réinitialise la liste des erreurs.
+     *
+     * @return void
      */
     public function reset() {
         $this->errors = [];

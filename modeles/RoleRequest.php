@@ -10,10 +10,22 @@
  * Workflow : Demande -> Examen -> Validation -> Changement de rôle
  * Status : pending, approved, rejected
  */
+/**
+ * Class RoleRequest
+ *
+ * Gère les demandes de changement de rôle des utilisateurs.
+ * Workflow : création, vérification des demandes en attente, approbation/rejet.
+ *
+ * @package Modeles
+ */
 class RoleRequest {
     private $conn;
     private $table_name = "role_requests";
 
+    /**
+     * RoleRequest constructor.
+     * @param PDO $db
+     */
     public function __construct($db) {
         $this->conn = $db;
     }

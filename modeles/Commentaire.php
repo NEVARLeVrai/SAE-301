@@ -11,6 +11,14 @@
  * Status : pending, approved, rejected
  * Les commentaires sont soumis à modération avant publication.
  */
+/**
+ * Class Commentaire
+ *
+ * Gestion des commentaires d'articles : création, lecture, modération et suppression.
+ * Les commentaires sont soumis à modération et disposent d'un statut.
+ *
+ * @package Modeles
+ */
 class Commentaire {
     private $conn;
     private $table_name = "comments";
@@ -19,7 +27,14 @@ class Commentaire {
         $this->conn = $db;
     }
 
-    // Créer un commentaire
+    /**
+     * Crée un commentaire en statut 'pending'.
+     *
+     * @param int $article_id
+     * @param int $user_id
+     * @param string $content
+     * @return bool
+     */
     public function create($article_id, $user_id, $content) {
         $query = "INSERT INTO " . $this->table_name . " (article_id, user_id, content, status, created_at) VALUES (:article_id, :user_id, :content, 'pending', NOW())";
         $stmt = $this->conn->prepare($query);
@@ -29,7 +44,12 @@ class Commentaire {
         return $stmt->execute();
     }
 
-    // Lire les commentaires validés d'un article
+    /**
+     * Récupère les commentaires approuvés pour un article.
+     *
+     * @param int $article_id
+     * @return array
+     */
     public function getCommentsByArticle($article_id) {
         $query = "SELECT c.*, u.username FROM " . $this->table_name . " c 
                   JOIN users u ON c.user_id = u.id 
@@ -41,7 +61,13 @@ class Commentaire {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    // Lire les commentaires d'un utilisateur avec leur statut (pour afficher l'état)
+    /**
+     * Récupère les commentaires d'un utilisateur pour un article (tous statuts).
+     *
+     * @param int $article_id
+     * @param int $user_id
+     * @return array
+     */
     public function getUserCommentsByArticle($article_id, $user_id) {
         $query = "SELECT c.*, u.username FROM " . $this->table_name . " c 
                   JOIN users u ON c.user_id = u.id 
@@ -54,7 +80,11 @@ class Commentaire {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lire tous les commentaires (pour modération admin)
+    /**
+     * Récupère tous les commentaires (usage modération/admin).
+     *
+     * @return array
+     */
     public function getAllComments() {
         $query = "SELECT c.*, u.username, a.title as article_title, a.author_id as article_author_id 
                   FROM " . $this->table_name . " c 
@@ -66,7 +96,12 @@ class Commentaire {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lire les commentaires sur les articles d'un auteur spécifique (pour rédacteur)
+    /**
+     * Récupère les commentaires pour les articles d'un auteur (pour modérateur/auteur).
+     *
+     * @param int $author_id
+     * @return array
+     */
     public function getCommentsByArticleAuthor($author_id) {
         $query = "SELECT c.*, u.username, a.title as article_title, a.author_id as article_author_id 
                   FROM " . $this->table_name . " c 
@@ -80,7 +115,13 @@ class Commentaire {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Vérifier si un commentaire appartient à un article d'un auteur
+    /**
+     * Vérifie l'appartenance d'un commentaire à un article d'un auteur.
+     *
+     * @param int $comment_id
+     * @param int $author_id
+     * @return bool
+     */
     public function isCommentOnAuthorArticle($comment_id, $author_id) {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " c 
                   JOIN articles a ON c.article_id = a.id 
@@ -93,7 +134,13 @@ class Commentaire {
         return $row['count'] > 0;
     }
 
-    // Modérer un commentaire
+    /**
+     * Met à jour le statut d'un commentaire (approve/reject).
+     *
+     * @param int $id
+     * @param string $status
+     * @return bool
+     */
     public function updateStatus($id, $status) {
         $query = "UPDATE " . $this->table_name . " SET status = :status WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -102,7 +149,12 @@ class Commentaire {
         return $stmt->execute();
     }
 
-    // Supprimer un commentaire
+    /**
+     * Supprime un commentaire de la base.
+     *
+     * @param int $id
+     * @return bool
+     */
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -110,7 +162,11 @@ class Commentaire {
         return $stmt->execute();
     }
 
-    // Créer un commentaire depuis les données POST (encapsulation)
+    /**
+     * Crée un commentaire à partir des données `$_POST`.
+     *
+     * @return bool
+     */
     public function createFromPost() {
         $article_id = isset($_POST['article_id']) ? intval($_POST['article_id']) : 0;
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;

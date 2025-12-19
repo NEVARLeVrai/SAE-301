@@ -13,16 +13,44 @@
  * 
  * Status : pending, paid, shipped, cancelled
  */
+/**
+ * Class Order
+ *
+ * Gestion des commandes : création, lecture, calculs de ventes.
+ * - Utilise une transaction pour créer la commande et ses `order_items`.
+ * - Effets de bord : écrit en base et décrémente le stock des produits.
+ * - Remarque : la méthode `create()` utilise une transaction mais n'applique
+ *   pas de verrouillage row-level (`SELECT ... FOR UPDATE`). En cas de
+ *   forte concurrence il est recommandé d'ajouter un verrouillage explicite
+ *   sur les lignes `products` avant de décrémenter le stock.
+ *
+ * @package Modeles
+ */
 class Order {
+    /** @var PDO Connexion PDO vers la base de données */
     private $conn;
+    /** @var string Nom de la table orders */
     private $table_name = "orders";
+    /** @var string Nom de la table order_items */
     private $items_table = "order_items";
 
+    /**
+     * Order constructor.
+     * @param PDO $db Instance PDO active
+     */
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Créer une commande
+    /**
+     * Crée une commande et ses items en base de données.
+     * Effectue une transaction et décrémente le stock des produits.
+     *
+     * @param int $user_id Identifiant de l'utilisateur commandant
+     * @param float $total_amount Montant total de la commande
+     * @param array $items Liste d'items, chaque item attend : ['product_id', 'quantity', 'price']
+     * @return int|false L'ID de la commande créée ou false en cas d'erreur
+     */
     public function create($user_id, $total_amount, $items) {
         try {
             $this->conn->beginTransaction();
@@ -64,7 +92,12 @@ class Order {
         }
     }
 
-    // Récupérer les commandes d'un utilisateur (US-19)
+    /**
+     * Récupère les commandes d'un utilisateur triées par date décroissante.
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @return array Liste associative des commandes
+     */
     public function getOrdersByUser($user_id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE user_id = :user_id ORDER BY created_at DESC";
         $stmt = $this->conn->prepare($query);
@@ -74,6 +107,11 @@ class Order {
     }
 
     // Récupérer toutes les commandes (Admin)
+    /**
+     * Récupère toutes les commandes (usage admin) avec le nom d'utilisateur.
+     *
+     * @return array Liste associative des commandes
+     */
     public function getAllOrders() {
         $query = "SELECT o.*, u.username FROM " . $this->table_name . " o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC";
         $stmt = $this->conn->prepare($query);
@@ -82,6 +120,12 @@ class Order {
     }
 
     // Récupérer les détails d'une commande
+    /**
+     * Récupère les items d'une commande et les informations produits associées.
+     *
+     * @param int $order_id Identifiant de la commande
+     * @return array Liste des items de la commande
+     */
     public function getOrderDetails($order_id) {
         $query = "SELECT oi.*, p.name as product_name 
                   FROM " . $this->items_table . " oi 
@@ -94,6 +138,12 @@ class Order {
     }
 
     // Calculer le CA total d'un vendeur (US-33)
+    /**
+     * Calcule le chiffre d'affaires total pour un vendeur (toutes commandes payées).
+     *
+     * @param int $seller_id Identifiant du vendeur
+     * @return float Montant total des ventes
+     */
     public function getSalesBySeller($seller_id) {
         $query = "SELECT SUM(oi.price * oi.quantity) as total_sales 
                   FROM " . $this->items_table . " oi
@@ -108,7 +158,13 @@ class Order {
         return $row['total_sales'] ? $row['total_sales'] : 0;
     }
 
-    // Vérifier si un utilisateur a acheté un produit (US-32)
+    /**
+     * Vérifie si un utilisateur a acheté un produit donné (utile pour accès aux téléchargements).
+     *
+     * @param int $user_id Identifiant de l'utilisateur
+     * @param int $product_id Identifiant du produit
+     * @return bool True si l'utilisateur a au moins une commande payée contenant le produit
+     */
     public function hasUserBoughtProduct($user_id, $product_id) {
         $query = "SELECT COUNT(*) as count 
                   FROM " . $this->items_table . " oi

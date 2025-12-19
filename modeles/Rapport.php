@@ -14,6 +14,14 @@
  * 
  * Encapsule toutes les requêtes SQL liées aux rapports.
  */
+/**
+ * Class Rapport
+ *
+ * Encapsule les requêtes SQL liées aux rapports et statistiques (ventes, utilisateurs,
+ * articles) et prépare les datasets pour export CSV/PDF.
+ *
+ * @package Modeles
+ */
 class Rapport {
     private $conn;
 

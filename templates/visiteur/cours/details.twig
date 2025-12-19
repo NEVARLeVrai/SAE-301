@@ -1,9 +1,14 @@
+{#
+    TEMPLATE: templates/visiteur/cours/details.twig
+    PURPOSE: Page détail d'un cours (public)
+    VARIABLES: `cours`, `related_courses` — fournis par le contrôleur visiteur
+#}
 {% extends 'base.twig' %}
 
 {% block title %} - {{ cours.title }}{% endblock %}
 
 {% block content %}
-<div class="cours-detail-container">
+<div class="course-detail-container">
     <a href="index.php?action=cours" class="btn btn-secondary mb-2">&larr; Retour aux cours</a>
     
     <div class="card">

@@ -1,3 +1,8 @@
+{#
+    TEMPLATE: templates/admin/cours/form.twig
+    PURPOSE: Formulaire création / édition d'un cours
+    VARIABLES: `cours` (optionnel), `error`, `breadcrumbs` — fournis par le contrôleur admin
+#}
 {% extends "base.twig" %}
 
 {% block title %} - {{ cours is defined ? 'Modifier le Cours' : 'Nouveau Cours' }}{% endblock %}

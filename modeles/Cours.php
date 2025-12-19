@@ -12,6 +12,14 @@
  * 
  * Niveaux : debutant, intermediaire, avance
  */
+/**
+ * Class Cours
+ *
+ * Gestion des cours : recherche, filtres, création et mise à jour.
+ * Fournit des méthodes utilitaires pour les filtres (niveaux, instruments, catégories).
+ *
+ * @package Modeles
+ */
 class Cours {
     private $conn;
     private $table_name = "courses";
@@ -20,7 +28,12 @@ class Cours {
         $this->conn = $db;
     }
 
-    // Lire les cours avec filtres optionnels
+    /**
+     * Récupère la liste des cours avec filtres optionnels (level, instrument, category).
+     *
+     * @param array $filters
+     * @return array
+     */
     public function getCourses($filters = []) {
         $query = "SELECT c.id, c.title, c.description, c.level, c.instrument, c.category, u.username as author 
                   FROM " . $this->table_name . " c
@@ -57,7 +70,12 @@ class Cours {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lire un cours par son ID
+    /**
+     * Récupère un cours par son identifiant.
+     *
+     * @param int $id
+     * @return array|false
+     */
     public function getCourseById($id) {
         $query = "SELECT c.*, u.username as author 
                   FROM " . $this->table_name . " c
@@ -72,7 +90,12 @@ class Cours {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer les listes distinctes pour les filtres
+    /**
+     * Récupère les valeurs distinctes d'une colonne (utile pour les filtres).
+     *
+     * @param string $column
+     * @return array
+     */
     public function getDistinctValues($column) {
         $query = "SELECT DISTINCT " . $column . " FROM " . $this->table_name . " ORDER BY " . $column;
         $stmt = $this->conn->prepare($query);
@@ -80,7 +103,12 @@ class Cours {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // Récupérer les derniers cours (pour l'accueil)
+    /**
+     * Récupère les derniers cours.
+     *
+     * @param int $limit
+     * @return array
+     */
     public function getLatestCourses($limit = 3) {
         $query = "SELECT c.id, c.title, c.description, c.level, c.instrument, c.category, u.username as author 
                   FROM " . $this->table_name . " c
@@ -95,7 +123,11 @@ class Cours {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Compter les cours
+    /**
+     * Compte le nombre total de cours.
+     *
+     * @return int
+     */
     public function count() {
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);
@@ -104,7 +136,18 @@ class Cours {
         return $row['total'];
     }
 
-    // Créer un cours
+    /**
+     * Crée un cours.
+     *
+     * @param string $title
+     * @param string $description
+     * @param string $content
+     * @param int $author_id
+     * @param string $level
+     * @param string $instrument
+     * @param string $category
+     * @return bool
+     */
     public function create($title, $description, $content, $author_id, $level, $instrument, $category) {
         $query = "INSERT INTO " . $this->table_name . " 
                   (title, description, content, author_id, level, instrument, category, created_at) 
@@ -126,7 +169,18 @@ class Cours {
         return false;
     }
 
-    // Mettre à jour un cours
+    /**
+     * Met à jour un cours.
+     *
+     * @param int $id
+     * @param string $title
+     * @param string $description
+     * @param string $content
+     * @param string $level
+     * @param string $instrument
+     * @param string $category
+     * @return bool
+     */
     public function update($id, $title, $description, $content, $level, $instrument, $category) {
         $query = "UPDATE " . $this->table_name . " 
                   SET title = :title, description = :description, content = :content,
@@ -149,7 +203,12 @@ class Cours {
         return false;
     }
 
-    // Supprimer un cours
+    /**
+     * Supprime un cours (suppression définitive).
+     *
+     * @param int $id
+     * @return bool
+     */
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -161,7 +220,12 @@ class Cours {
         return false;
     }
 
-    // Créer un cours depuis les données POST (encapsulation)
+    /**
+     * Crée un cours à partir de `$_POST`.
+     *
+     * @param int $author_id
+     * @return bool
+     */
     public function createFromPost($author_id) {
         $title = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
         $description = isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '';
@@ -173,7 +237,11 @@ class Cours {
         return $this->create($title, $description, $content, $author_id, $level, $instrument, $category);
     }
 
-    // Mettre à jour un cours depuis les données POST (encapsulation)
+    /**
+     * Met à jour un cours depuis `$_POST`.
+     *
+     * @return bool
+     */
     public function updateFromPost() {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $title = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
@@ -186,7 +254,11 @@ class Cours {
         return $this->update($id, $title, $description, $content, $level, $instrument, $category);
     }
 
-    // Récupérer l'ID depuis POST
+    /**
+     * Récupère l'ID envoyé via POST.
+     *
+     * @return int
+     */
     public function getIdFromPost() {
         return isset($_POST['id']) ? intval($_POST['id']) : 0;
     }

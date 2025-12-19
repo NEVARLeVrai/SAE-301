@@ -193,6 +193,11 @@ if ($action === 'remove_favorite') {
 }
 
 // Vérification connexion pour pages protégées (redirection vers login)
+/**
+ * Actions front-office nécessitant une authentification.
+ * Si l'utilisateur n'est pas connecté, il est redirigé vers la page de connexion.
+ * @var string[] $protected_actions
+ */
 $protected_actions = ['my_orders', 'my_favorites', 'checkout', 'download', 'request_role', 'sell_instrument'];
 if (in_array($action, $protected_actions) && !isset($_SESSION['user_logged_in'])) {
     header('Location: index.php?action=login');
@@ -215,7 +220,12 @@ if ($action === 'request_role' && isset($_SESSION['user_role']) && $_SESSION['us
 // ROUTAGE PRINCIPAL - Rendu avec Twig
 // ===========================================
 switch ($action) {
-    // US-11 : Page d'accueil avec dernières nouveautés
+    /**
+     * US-11 : Page d'accueil avec dernières nouveautés
+     * Purpose: affiche les dernières actualités et cours
+     * Template: visiteur/accueil.twig
+     * Variables: `derniers_articles`, `derniers_cours`
+     */
     case 'accueil':
         $coursModel = new Cours($db);
         $articleModel = new Article($db);
@@ -232,7 +242,12 @@ switch ($action) {
         ]);
         break;
     
-    // US-01, US-12 : Liste des cours avec filtres (niveau, instrument, catégorie)
+    /**
+     * US-01, US-12 : Liste des cours avec filtres (niveau, instrument, catégorie)
+     * Purpose: affiche la liste des cours et les options de filtrage
+     * Template: visiteur/cours/list.twig
+     * Variables: `liste_cours`, `levels`, `instruments`, `categories`, `current_*`
+     */
     case 'cours':
         $cours = new Cours($db);
 
@@ -261,7 +276,12 @@ switch ($action) {
         ]);
         break;
 
-    // US-15, US-31 : Fiche détaillée d'un cours
+    /**
+     * US-15, US-31 : Fiche détaillée d'un cours
+     * Purpose: affiche le détail d'un cours, indique si l'utilisateur a ajouté en favori
+     * Template: visiteur/cours/details.twig
+     * Variables: `cours`, `is_favorite`, `breadcrumbs`
+     */
     case 'cours_details':
         if (isset($_GET['id'])) {
             $coursModel = new Cours($db);
@@ -290,7 +310,12 @@ switch ($action) {
         }
         break;
     
-    // US-02, US-13 : Blog avec recherche et filtres par catégorie
+    /**
+     * US-02, US-13 : Blog avec recherche et filtres par catégorie
+     * Purpose: liste des articles, recherche et filtrage par catégorie
+     * Template: visiteur/articles/list.twig
+     * Variables: `liste_articles`, `categories`, `current_search`, `current_category`
+     */
     case 'blog':
         $articleModel = new Article($db);
         $categories = $articleModel->getCategories();
@@ -313,7 +338,12 @@ switch ($action) {
         echo render_template($twig, 'visiteur/articles/list.twig', $twigVars);
         break;
 
-    // US-02 : Fiche détaillée d'un article avec commentaires
+    /**
+     * US-02 : Fiche détaillée d'un article avec commentaires
+     * Purpose: affiche l'article et ses commentaires validés
+     * Template: visiteur/articles/details.twig
+     * Variables: `article`, `commentaires`, `userComments`, `is_favorite`, `comment_message`
+     */
     case 'article_details':
         if (isset($_GET['id'])) {
             $articleModel = new Article($db);
@@ -362,7 +392,12 @@ switch ($action) {
         }
         break;
 
-    // US-03 : Boutique avec produits approuvés uniquement
+    /**
+     * US-03 : Boutique avec produits approuvés uniquement
+     * Purpose: affiche les produits publiés et informations vendeur
+     * Template: visiteur/produits/list.twig
+     * Variables: `liste_produits`, `breadcrumbs`
+     */
     case 'boutique':
         $produitModel = new Produit($db);
         // Affiche uniquement les produits approuvés (pas pending/rejected)
@@ -386,7 +421,12 @@ switch ($action) {
         ]);
         break;
 
-    // US-03, US-21 : Fiche produit avec avis et notes
+    /**
+     * US-03, US-21 : Fiche produit avec avis et notes
+     * Purpose: détail produit, avis, vérification d'achat pour téléchargement/avis
+     * Template: visiteur/produits/details.twig
+     * Variables: `produit`, `seller`, `avis`, `moyenne_note`, `user_has_bought`
+     */
     case 'produit_details':
         if (isset($_GET['id'])) {
             $produitModel = new Produit($db);
@@ -429,6 +469,12 @@ switch ($action) {
         }
         break;
 
+    /**
+     * Page contact
+     * Purpose: affiche formulaire de contact / dépôt d'annonce
+     * Template: visiteur/contact.twig
+     * Variables: `deposer_annonce`, `breadcrumbs`
+     */
     case 'contact':
         echo render_template($twig, 'visiteur/contact.twig', [
             'breadcrumbs' => ['Contact' => 'index.php?action=contact'],
@@ -436,6 +482,12 @@ switch ($action) {
         ]);
         break;
 
+    /**
+     * Panier (US-17, US-18)
+     * Purpose: affiche et modifie le panier courant stocké en session
+     * Template: visiteur/orders/panier.twig
+     * Variables: `panier_details`, `total`
+     */
     case 'panier':
         // Récupérer les détails des produits du panier
         $panier_details = [];
@@ -462,6 +514,12 @@ switch ($action) {
         ]);
         break;
 
+    /**
+     * Connexion utilisateur
+     * Purpose: formulaire de login et traitement POST via `User::loginFromPost()`
+     * Template: visiteur/auth/login.twig
+     * Variables: `error`, `breadcrumbs`
+     */
     case 'login':
         $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -515,6 +573,12 @@ switch ($action) {
         ]);
         break;
 
+    /**
+     * Inscription utilisateur
+     * Purpose: formulaire d'inscription et création utilisateur via `User::createFromPost()`
+     * Template: visiteur/auth/register.twig
+     * Variables: `error`, `breadcrumbs`
+     */
     case 'register':
         $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -567,7 +631,18 @@ switch ($action) {
         ]);
         break;
 
-    // US-03, US-20 : Validation de commande et envoi email de confirmation
+    /**
+     * US-03, US-20 : Validation de commande et envoi email de confirmation
+     * - Crée la commande via `Order::create()` (décrémente le stock)
+     * - Prépare et (optionnellement) envoie l'e-mail de confirmation au client
+     * Variables locaux attendus : `$panier_details`, `$items`, `$total`
+     */
+    /**
+     * US-03, US-20 : Validation de commande et envoi email de confirmation
+     * Purpose: crée la commande, décrémente les stocks, envoie email (optionnel)
+     * Template: visiteur/orders/checkout.twig (GET) or visiteur/orders/confirmation.twig (POST success)
+     * Variables: `panier_details`, `total`, `error`, `success`
+     */
     case 'checkout':
         // Vérifications connexion et panier faites avant le header
         $error = null;
@@ -652,8 +727,12 @@ switch ($action) {
         ]);
         break;
 
-    // US-04 : Vente d'instrument d'occasion par un visiteur
-    // Le produit passe en status 'pending' pour modération (US-10)
+    /**
+     * US-04 : Vente d'instrument d'occasion par un visiteur
+     * Purpose: traitement du formulaire de dépôt d'annonce, upload d'image, création produit en 'pending'
+     * Template: visiteur/produits/sell.twig
+     * Variables: `success`, `error`, `breadcrumbs`
+     */
     case 'sell_instrument':
         $success = null;
         $error = null;
@@ -691,7 +770,12 @@ switch ($action) {
         ]);
         break;
 
-    // --- MES COMMANDES (US-19) ---
+    /**
+     * US-19 : Mes commandes
+     * Purpose: liste des commandes de l'utilisateur connecté
+     * Template: visiteur/orders/list.twig
+     * Variables: `orders`, `breadcrumbs`
+     */
     case 'my_orders':
         // Vérification connexion faite avant le header
         $orderModel = new Order($db);
@@ -702,8 +786,12 @@ switch ($action) {
         ]);
         break;
 
-    // US-32 : Téléchargement sécurisé de produit numérique
-    // Protection : seuls les acheteurs peuvent télécharger (403 sinon)
+    /**
+     * US-32 : Téléchargement sécurisé de produit numérique
+     * Purpose: force le téléchargement si l'utilisateur a acheté le produit
+     * Security: vérifie `Order::hasUserBoughtProduct()` puis sert le fichier via `readfile()`
+     * Variables: none (response is file download)
+     */
     case 'download':
         if (isset($_GET['id'])) {
             $product_id = $_GET['id'];
@@ -744,7 +832,12 @@ switch ($action) {
         }
         break;
 
-    // --- FAVORIS (US-16) ---
+    /**
+     * US-16 : Favoris
+     * Purpose: affiche les favoris (cours ou articles) de l'utilisateur
+     * Template: visiteur/favorites/list.twig
+     * Variables: `favorite_courses` or `favorite_articles`, `current_type`
+     */
     case 'my_favorites':
         // Vérification connexion faite avant le header
         $favoriModel = new Favori($db);
@@ -765,9 +858,12 @@ switch ($action) {
         echo render_template($twig, 'visiteur/favorites/list.twig', $twigVars);
         break;
 
-    // ==========================================
-    // US-39 : DEMANDE DE RÔLE (Visiteur -> Rédacteur/Musicien)
-    // ==========================================
+    /**
+     * US-39 : Demande de rôle (Visiteur -> Rédacteur/Musicien)
+     * Purpose: permet à un visiteur de demander un rôle, notifie les admins
+     * Template: visiteur/auth/request_role.twig
+     * Variables: `hasPending`, `myRequests`, `success`, `error`
+     */
     case 'request_role':
         // Vérifications connexion et rôle faites avant le header
         $roleRequestModel = new RoleRequest($db);
@@ -805,7 +901,12 @@ switch ($action) {
         ]);
         break;
 
-    // --- MENTIONS LÉGALES ---
+    /**
+     * Mentions légales
+     * Purpose: affiche la page des mentions légales
+     * Template: visiteur/mentions_legales.twig
+     * Variables: `breadcrumbs`
+     */
     case 'mentions_legales':
         echo render_template($twig, 'visiteur/mentions_legales.twig', [
             'breadcrumbs' => ['Mentions légales' => 'index.php?action=mentions_legales']

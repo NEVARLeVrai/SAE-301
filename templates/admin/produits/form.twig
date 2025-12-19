@@ -1,3 +1,8 @@
+{#
+    TEMPLATE: templates/admin/produits/form.twig
+    PURPOSE: Formulaire création/édition d'un produit (admin/musicien)
+    VARIABLES: `produit` (optionnel), `error`, `breadcrumbs` — fournis par le contrôleur admin
+#}
 {% extends "base.twig" %}
 
 {% block title %} - {{ produit is defined ? 'Modifier' : 'Créer' }} un Produit{% endblock %}

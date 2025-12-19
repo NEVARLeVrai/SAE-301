@@ -1,16 +1,17 @@
 <?php
 /**
- * ===========================================
- * Modèle FileUpload - Gestion des uploads
- * ===========================================
- * 
- * User Stories concernées :
- * - US-23 : Upload de fichiers multimédias (5Mo max)
- * 
- * Formats images : JPG, PNG, GIF
- * Formats fichiers : PDF, MP3, WAV
- * 
- * Centralise la logique d'upload pour éviter la duplication.
+ * Class FileUpload
+ *
+ * Centralise la logique d'upload des fichiers et images utilisés par l'application.
+ * - Limite la taille à 5Mo
+ * - Vérifie le MIME via `finfo`
+ * - Déplace les fichiers vers les répertoires configurés
+ *
+ * Security notes:
+ * - Il est recommandé d'effectuer une validation additionnelle (ex: getimagesize
+ *   et ré-encodage pour les images) et de stocker les fichiers sensibles hors du webroot.
+ *
+ * @package Modeles
  */
 class FileUpload {
     // Constantes pour les chemins (à adapter selon votre structure)

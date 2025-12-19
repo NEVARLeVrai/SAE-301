@@ -11,6 +11,15 @@
  * - Local : root/root
  * - Production : identifiants sécurisés
  */
+/**
+ * Class Database
+ *
+ * Fournit une connexion PDO via le pattern singleton (méthode `getConnection`).
+ * Attention: les identifiants sont codés en dur ici pour l'exemple ; en production
+ * utilisez des variables d'environnement ou un fichier de configuration exclu du VCS.
+ *
+ * @package Modeles
+ */
 class Database {
     private $host = "localhost";
     private $db_name = "soares_sae301"; 
@@ -19,7 +28,9 @@ class Database {
     public $conn;
 
     /**
-     * Retourne une connexion PDO à la base de données
+     * Retourne une connexion PDO à la base de données.
+     *
+     * @return PDO|null
      */
     public function getConnection() {
         $this->conn = null;

@@ -1,17 +1,14 @@
 <?php
 /**
- * ===========================================
- * Modèle Article - Gestion du blog
- * ===========================================
- * 
- * User Stories concernées :
- * - US-02 : Veille musicale (affichage blog)
- * - US-06 : Rédaction d'articles (back-office)
- * - US-07 : Gestion de ses propres articles (Rédacteur)
- * - US-13 : Recherche d'articles
- * - US-22 : Planification de publication
- * - US-25 : Système de brouillons
- * - US-36 : Suppression logique (soft delete)
+ * Class Article
+ *
+ * Gestion des articles du blog : lecture, création, mise à jour, suppression logique,
+ * recherche et publication différée.
+ *
+ * Important: les méthodes `createFromPost` et `updateFromPost` lisent `$_POST` —
+ * elles encapsulent la construction des paramètres mais modifient l'état global.
+ *
+ * @package Modeles
  */
 class Article {
     private $conn;
@@ -21,7 +18,13 @@ class Article {
         $this->conn = $db;
     }
 
-    // Lire les articles avec filtre optionnel par catégorie et statut
+    /**
+     * Lire les articles avec filtre par catégorie et statut.
+     *
+     * @param string|null $category
+     * @param string $status 'published'|'all'|...'status'
+     * @return array
+     */
     public function getArticles($category = null, $status = 'published') {
         $query = "SELECT a.*, u.username as author 
                   FROM " . $this->table_name . " a
@@ -56,7 +59,12 @@ class Article {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lire un article par ID
+    /**
+     * Récupère un article par son identifiant.
+     *
+     * @param int $id
+     * @return array|false
+     */
     public function getArticleById($id) {
         $query = "SELECT a.*, u.username as author 
                   FROM " . $this->table_name . " a
@@ -71,7 +79,12 @@ class Article {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Recherche d'articles (US-13)
+    /**
+     * Recherche d'articles par terme dans le titre ou le contenu.
+     *
+     * @param string $term
+     * @return array
+     */
     public function searchArticles($term) {
         $query = "SELECT a.*, u.username as author 
                   FROM " . $this->table_name . " a
@@ -88,7 +101,12 @@ class Article {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer les derniers articles publiés (pour l'accueil)
+    /**
+     * Récupère les derniers articles publiés.
+     *
+     * @param int $limit
+     * @return array
+     */
     public function getLatestArticles($limit = 3) {
         $query = "SELECT a.*, u.username as author 
                   FROM " . $this->table_name . " a
@@ -105,7 +123,11 @@ class Article {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    // Récupérer les catégories distinctes
+    /**
+     * Récupère la liste des catégories distinctes.
+     *
+     * @return array
+     */
     public function getCategories() {
         $query = "SELECT DISTINCT category FROM " . $this->table_name . " WHERE is_deleted = 0 ORDER BY category";
         $stmt = $this->conn->prepare($query);
@@ -113,7 +135,18 @@ class Article {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // Créer un article
+    /**
+     * Crée un nouvel article en base.
+     *
+     * @param string $title
+     * @param string $content
+     * @param int $author_id
+     * @param string $category
+     * @param string $image_url
+     * @param string $status
+     * @param string|null $published_at
+     * @return bool
+     */
     public function create($title, $content, $author_id, $category, $image_url, $status = 'published', $published_at = null) {
         $query = "INSERT INTO " . $this->table_name . " 
                   (title, content, author_id, category, image_url, status, published_at, created_at) 
@@ -135,7 +168,18 @@ class Article {
         return false;
     }
 
-    // Mettre à jour un article (US-07)
+    /**
+     * Met à jour un article existant.
+     *
+     * @param int $id
+     * @param string $title
+     * @param string $content
+     * @param string $category
+     * @param string $image_url
+     * @param string $status
+     * @param string|null $published_at
+     * @return bool
+     */
     public function update($id, $title, $content, $category, $image_url, $status, $published_at = null) {
         $query = "UPDATE " . $this->table_name . " 
                   SET title = :title, content = :content, category = :category, 
@@ -158,7 +202,12 @@ class Article {
         return false;
     }
 
-    // Supprimer un article (Suppression logique)
+    /**
+     * Suppression logique d'un article (flag `is_deleted`).
+     *
+     * @param int $id
+     * @return bool
+     */
     public function delete($id) {
         $query = "UPDATE " . $this->table_name . " SET is_deleted = 1 WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -170,7 +219,12 @@ class Article {
         return false;
     }
 
-    // Récupérer les articles d'un auteur spécifique (US-07)
+    /**
+     * Récupère les articles d'un auteur donné.
+     *
+     * @param int $author_id
+     * @return array
+     */
     public function getArticlesByAuthor($author_id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE author_id = :author_id AND is_deleted = 0 ORDER BY created_at DESC";
         $stmt = $this->conn->prepare($query);
@@ -179,7 +233,11 @@ class Article {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Compter les articles
+    /**
+     * Compte le nombre d'articles non supprimés.
+     *
+     * @return int
+     */
     public function count() {
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE is_deleted = 0";
         $stmt = $this->conn->prepare($query);
@@ -188,7 +246,13 @@ class Article {
         return $row['total'];
     }
 
-    // Créer un article depuis les données POST (encapsulation)
+    /**
+     * Crée un article à partir des données `$_POST` (encapsulation).
+     *
+     * @param int $author_id
+     * @param string|null $uploadedImage
+     * @return bool
+     */
     public function createFromPost($author_id, $uploadedImage = null) {
         $title = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
         $content = isset($_POST['content']) ? $_POST['content'] : '';
@@ -200,7 +264,12 @@ class Article {
         return $this->create($title, $content, $author_id, $category, $image_url, $status, $published_at);
     }
 
-    // Mettre à jour un article depuis les données POST (encapsulation)
+    /**
+     * Met à jour un article depuis les données `$_POST`.
+     *
+     * @param string|null $uploadedImage
+     * @return bool
+     */
     public function updateFromPost($uploadedImage = null) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $title = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
@@ -213,7 +282,11 @@ class Article {
         return $this->update($id, $title, $content, $category, $image_url, $status, $published_at);
     }
 
-    // Récupérer l'ID depuis POST
+    /**
+     * Récupère l'ID envoyé en POST.
+     *
+     * @return int
+     */
     public function getIdFromPost() {
         return isset($_POST['id']) ? intval($_POST['id']) : 0;
     }
